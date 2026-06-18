@@ -209,4 +209,3 @@ function OfferRow({ offer, onDelete }: { offer: Offer; onDelete: () => void }) {
     </TableRow>
   );
 }
-
