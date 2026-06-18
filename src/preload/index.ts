@@ -1,0 +1,28 @@
+import { contextBridge, ipcRenderer } from "electron";
+import { IPC_CHANNELS } from "../main/shared/constants";
+import type { JobAssistantApi } from "../main/shared/ipc-api";
+
+const api: JobAssistantApi = {
+  offers: {
+    list: (query) => ipcRenderer.invoke(IPC_CHANNELS.offersList, query),
+    get: (id) => ipcRenderer.invoke(IPC_CHANNELS.offersGet, id),
+    create: (input) => ipcRenderer.invoke(IPC_CHANNELS.offersCreate, input),
+    delete: (id) => ipcRenderer.invoke(IPC_CHANNELS.offersDelete, id)
+  },
+  collection: {
+    classifyUrl: (input) => ipcRenderer.invoke(IPC_CHANNELS.collectionClassify, input),
+    saveCollectedUrl: (input) => ipcRenderer.invoke(IPC_CHANNELS.collectionSave, input)
+  },
+  queue: {
+    list: (query) => ipcRenderer.invoke(IPC_CHANNELS.queueList, query),
+    build: () => ipcRenderer.invoke(IPC_CHANNELS.queueBuild),
+    getNext: () => ipcRenderer.invoke(IPC_CHANNELS.queueGetNext),
+    skip: (id, reason) => ipcRenderer.invoke(IPC_CHANNELS.queueSkip, { id, reason }),
+    markSent: (id) => ipcRenderer.invoke(IPC_CHANNELS.queueMarkSent, id)
+  },
+  rapidApply: {
+    fillItem: (id) => ipcRenderer.invoke(IPC_CHANNELS.rapidApplyFill, id)
+  }
+};
+
+contextBridge.exposeInMainWorld("jobAssistant", api);

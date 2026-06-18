@@ -1,0 +1,95 @@
+import path from "node:path";
+import fs from "node:fs";
+import Database from "better-sqlite3";
+import { drizzle, type BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
+import type { App } from "electron";
+import { applyQueueItemsTable, collectedUrlsTable, offersTable } from "./schema";
+
+const schema = {
+  offersTable,
+  collectedUrlsTable,
+  applyQueueItemsTable
+};
+
+export type AppDb = BetterSQLite3Database<typeof schema>;
+
+export interface DbContext {
+  sqlite: Database.Database;
+  db: AppDb;
+}
+
+export function resolveDbPath(app?: App): string {
+  if (process.env.PEPE_DB_PATH) {
+    return process.env.PEPE_DB_PATH;
+  }
+
+  if (process.env.NODE_ENV === "development") {
+    return path.resolve(process.cwd(), "data", "app.db");
+  }
+
+  if (app) {
+    return path.join(app.getPath("userData"), "app.db");
+  }
+
+  return path.resolve(process.cwd(), "data", "app.db");
+}
+
+export function initSqlite(dbPath: string): DbContext {
+  fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+  const sqlite = new Database(dbPath);
+
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS offers (
+      id TEXT PRIMARY KEY,
+      source TEXT NOT NULL,
+      url TEXT UNIQUE NOT NULL,
+      title TEXT,
+      company TEXT,
+      location TEXT,
+      salary_raw TEXT,
+      salary_min INTEGER,
+      salary_max INTEGER,
+      salary_currency TEXT,
+      salary_period TEXT,
+      salary_monthly_min INTEGER,
+      salary_monthly_max INTEGER,
+      technologies_json TEXT NOT NULL DEFAULT '[]',
+      description TEXT,
+      score INTEGER,
+      decision TEXT,
+      reasons_json TEXT NOT NULL DEFAULT '[]',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS collected_urls (
+      id TEXT PRIMARY KEY,
+      source TEXT NOT NULL,
+      url TEXT UNIQUE NOT NULL,
+      classification TEXT NOT NULL,
+      classification_reason TEXT NOT NULL,
+      relevance_score INTEGER,
+      relevance_decision TEXT,
+      matched_keywords_json TEXT NOT NULL DEFAULT '[]',
+      negative_keywords_json TEXT NOT NULL DEFAULT '[]',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS apply_queue_items (
+      id TEXT PRIMARY KEY,
+      offer_id TEXT NOT NULL,
+      status TEXT NOT NULL,
+      priority_score REAL NOT NULL DEFAULT 0,
+      reasons_json TEXT NOT NULL DEFAULT '[]',
+      skip_reason TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+  `);
+
+  return {
+    sqlite,
+    db: drizzle(sqlite, { schema })
+  };
+}
