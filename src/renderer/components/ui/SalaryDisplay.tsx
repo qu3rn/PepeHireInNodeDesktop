@@ -18,7 +18,7 @@ export function SalaryDisplay({
   const curr = currency ?? "PLN";
 
   if (!raw && !monthlyMin) {
-    return <span className={cn("text-xs text-gray-400 italic", className)}>Not specified</span>;
+    return <span className={cn("text-xs text-[var(--text-muted)] italic", className)}>Not specified</span>;
   }
 
   const monthly =
@@ -31,10 +31,10 @@ export function SalaryDisplay({
   return (
     <div className={cn("flex flex-col gap-0.5", className)}>
       {monthly ? (
-        <span className="text-sm font-medium text-gray-900">{monthly}</span>
+        <span className="text-sm font-medium text-[var(--text)]">{monthly}</span>
       ) : null}
       {raw && (
-        <span className={cn("text-xs text-gray-400", monthly ? "" : "text-sm font-medium text-gray-900")}>
+        <span className={cn("text-xs text-[var(--text-muted)]", monthly ? "" : "text-sm font-medium text-[var(--text)]")}>
           {raw}
         </span>
       )}

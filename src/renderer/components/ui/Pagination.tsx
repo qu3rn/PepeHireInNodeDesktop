@@ -23,7 +23,7 @@ export function Pagination({
   const to = Math.min(page * pageSize, total);
 
   return (
-    <div className={cn("flex items-center justify-between text-sm text-gray-500", className)}>
+    <div className={cn("flex items-center justify-between text-sm text-[var(--text-muted)]", className)}>
       <span className="text-xs">
         {total === 0 ? "No results" : `${from}–${to} of ${total}`}
       </span>

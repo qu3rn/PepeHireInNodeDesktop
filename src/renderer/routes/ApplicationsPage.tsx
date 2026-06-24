@@ -4,7 +4,7 @@ import { Users } from "lucide-react";
 export function ApplicationsPage() {
   return (
     <div className="space-y-4 p-6">
-      <h2 className="text-base font-semibold text-gray-900">Applications</h2>
+      <h2 className="text-base font-semibold text-[var(--text)]">Applications</h2>
       <Card>
         <CardHeader>
           <CardTitle>History</CardTitle>

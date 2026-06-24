@@ -4,7 +4,7 @@ import { Bug } from "lucide-react";
 export function DebugPage() {
   return (
     <div className="space-y-4 p-6">
-      <h2 className="text-base font-semibold text-gray-900">Debug</h2>
+      <h2 className="text-base font-semibold text-[var(--text)]">Debug</h2>
       <Card>
         <CardHeader>
           <CardTitle>Collector Diagnostics</CardTitle>

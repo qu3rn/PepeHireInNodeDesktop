@@ -62,7 +62,7 @@ export function OffersPage() {
   return (
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-gray-900">Offers</h2>
+        <h2 className="text-base font-semibold text-[var(--text)]">Offers</h2>
         <div className="flex items-center gap-2">
           <Input
             placeholder="Search title, company…"
@@ -83,7 +83,7 @@ export function OffersPage() {
       <div className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
         <Card>
           {isLoading ? (
-            <div className="py-12 text-center text-sm text-gray-400">Loading…</div>
+            <div className="py-12 text-center text-sm text-[var(--text-muted)]">Loading…</div>
           ) : !data?.items.length ? (
             <EmptyState
               icon={<Briefcase className="h-8 w-8" />}
@@ -121,7 +121,7 @@ export function OffersPage() {
                   ))}
                 </TableBody>
               </Table>
-              <div className="border-t border-gray-100 px-3 py-2">
+              <div className="border-t border-[var(--border)] px-3 py-2">
                 <Pagination
                   page={data.page}
                   totalPages={data.totalPages}
@@ -140,7 +140,7 @@ export function OffersPage() {
       <Dialog open={showAdd} onClose={() => setShowAdd(false)} title="Add Offer">
         <div className="space-y-3">
           <div>
-            <label className="text-xs font-medium text-gray-700">URL *</label>
+            <label className="text-xs font-medium text-[var(--text-secondary)]">URL *</label>
             <Input
               value={url}
               onChange={(e) => setUrl(e.target.value)}
@@ -150,7 +150,7 @@ export function OffersPage() {
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-gray-700">Title (optional)</label>
+            <label className="text-xs font-medium text-[var(--text-secondary)]">Title (optional)</label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -188,13 +188,13 @@ function OfferRow({
   selected: boolean;
 }) {
   return (
-    <TableRow className={selected ? "bg-blue-50/60" : undefined} onClick={onSelect}>
+    <TableRow className={selected ? "bg-[color:rgba(47,124,255,0.14)]" : undefined} onClick={onSelect}>
       <TableCell className="max-w-xs">
-        <p className="truncate font-medium text-gray-900">{offer.title ?? "(untitled)"}</p>
-        <p className="truncate text-xs text-gray-400">{offer.url}</p>
+        <p className="truncate font-medium text-[var(--text)]">{offer.title ?? "(untitled)"}</p>
+        <p className="truncate text-xs text-[var(--text-muted)]">{offer.url}</p>
       </TableCell>
       <TableCell>
-        {offer.company ?? <span className="text-gray-400">–</span>}
+        {offer.company ?? <span className="text-[var(--text-muted)]">–</span>}
       </TableCell>
       <TableCell>
         <SalaryDisplay
@@ -218,7 +218,7 @@ function OfferRow({
           variant="ghost"
           size="sm"
           onClick={onDelete}
-          className="text-gray-300 hover:text-red-600"
+          className="text-[var(--text-muted)] hover:text-[var(--accent)]"
           aria-label="Delete offer"
         >
           <Trash2 className="h-3.5 w-3.5" />

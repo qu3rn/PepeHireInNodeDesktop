@@ -10,7 +10,7 @@ export interface TechStackChipsProps {
 
 export function TechStackChips({ technologies, max, className }: TechStackChipsProps) {
   if (!technologies.length) {
-    return <span className="text-xs text-gray-400">–</span>;
+    return <span className="text-xs text-[var(--text-muted)]">–</span>;
   }
 
   const visible = max ? technologies.slice(0, max) : technologies;
@@ -24,15 +24,15 @@ export function TechStackChips({ technologies, max, className }: TechStackChipsP
           className={cn(
             "inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium",
             HIGHLIGHT.has(tech.toLowerCase())
-              ? "bg-blue-100 text-blue-700"
-              : "bg-gray-100 text-gray-600"
+              ? "bg-[color:rgba(47,124,255,0.2)] text-[#a5c5ff]"
+              : "bg-[var(--bg-surface-2)] text-[var(--text-secondary)]"
           )}
         >
           {tech}
         </span>
       ))}
       {overflow > 0 && (
-        <span className="inline-flex items-center px-1 py-0.5 text-xs text-gray-400">
+        <span className="inline-flex items-center px-1 py-0.5 text-xs text-[var(--text-muted)]">
           +{overflow}
         </span>
       )}

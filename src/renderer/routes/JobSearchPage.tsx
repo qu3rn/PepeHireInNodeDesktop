@@ -41,7 +41,7 @@ export function JobSearchPage() {
 
   return (
     <div className="space-y-4 p-6">
-      <h2 className="text-base font-semibold text-gray-900">Job Search</h2>
+      <h2 className="text-base font-semibold text-[var(--text)]">Job Search</h2>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
@@ -50,7 +50,7 @@ export function JobSearchPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <label className="text-xs font-medium text-gray-700">Source</label>
+              <label className="text-xs font-medium text-[var(--text-secondary)]">Source</label>
               <Select
                 value={source}
                 onChange={(e) => setSource(e.target.value)}
@@ -63,7 +63,7 @@ export function JobSearchPage() {
               </Select>
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-700">URL</label>
+              <label className="text-xs font-medium text-[var(--text-secondary)]">URL</label>
               <Input
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
@@ -72,12 +72,12 @@ export function JobSearchPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-700">Preview text</label>
+              <label className="text-xs font-medium text-[var(--text-secondary)]">Preview text</label>
               <textarea
                 value={preview}
                 onChange={(e) => setPreview(e.target.value)}
                 rows={3}
-                className="mt-1 w-full rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg-surface)] px-2.5 py-1.5 text-sm text-[var(--text)] placeholder-[var(--text-muted)] focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
               />
             </div>
             <div className="flex gap-2">
@@ -114,13 +114,13 @@ export function JobSearchPage() {
                 <StatusBadge status={classify.data.relevanceDecision} />
               </Row>
               <Row label="Score">
-                <span className="text-sm font-medium tabular-nums">
+                <span className="text-sm font-medium tabular-nums text-[var(--text)]">
                   {classify.data.relevanceScore}
                 </span>
               </Row>
               {classify.data.matchedKeywords.length > 0 && (
                 <div>
-                  <p className="mb-1 text-xs text-gray-500">Matched</p>
+                  <p className="mb-1 text-xs text-[var(--text-muted)]">Matched</p>
                   <div className="flex flex-wrap gap-1">
                     {classify.data.matchedKeywords.map((k) => (
                       <Badge key={k} variant="success">
@@ -132,7 +132,7 @@ export function JobSearchPage() {
               )}
               {classify.data.negativeKeywords.length > 0 && (
                 <div>
-                  <p className="mb-1 text-xs text-gray-500">Negative</p>
+                  <p className="mb-1 text-xs text-[var(--text-muted)]">Negative</p>
                   <div className="flex flex-wrap gap-1">
                     {classify.data.negativeKeywords.map((k) => (
                       <Badge key={k} variant="destructive">
@@ -142,7 +142,7 @@ export function JobSearchPage() {
                   </div>
                 </div>
               )}
-              <p className="text-xs italic text-gray-400">{classify.data.reason}</p>
+              <p className="text-xs italic text-[var(--text-muted)]">{classify.data.reason}</p>
             </CardContent>
           </Card>
         )}
@@ -154,7 +154,7 @@ export function JobSearchPage() {
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-sm text-gray-500">{label}</span>
+      <span className="text-sm text-[var(--text-secondary)]">{label}</span>
       {children}
     </div>
   );
