@@ -1,22 +1,30 @@
 import { useState } from "react";
-import { Briefcase, Search, ListOrdered, Zap } from "lucide-react";
+import { BarChart3, Briefcase, Bug, ListOrdered, Settings, Search, Users, Zap } from "lucide-react";
 import { cn } from "./lib/cn";
+import { DashboardPage } from "./routes/DashboardPage";
 import { OffersPage } from "./routes/OffersPage";
 import { JobSearchPage } from "./routes/JobSearchPage";
 import { ApplyQueuePage } from "./routes/ApplyQueuePage";
 import { RapidApplyPage } from "./routes/RapidApplyPage";
+import { ApplicationsPage } from "./routes/ApplicationsPage";
+import { DebugPage } from "./routes/DebugPage";
+import { SettingsPage } from "./routes/SettingsPage";
 
-type Page = "offers" | "search" | "queue" | "rapid";
+type Page = "dashboard" | "offers" | "search" | "queue" | "rapid" | "applications" | "debug" | "settings";
 
 const NAV_ITEMS = [
+  { id: "dashboard" as Page, label: "Dashboard", Icon: BarChart3 },
   { id: "offers" as Page, label: "Offers", Icon: Briefcase },
   { id: "search" as Page, label: "Job Search", Icon: Search },
   { id: "queue" as Page, label: "Apply Queue", Icon: ListOrdered },
-  { id: "rapid" as Page, label: "Rapid Apply", Icon: Zap }
+  { id: "rapid" as Page, label: "Rapid Apply", Icon: Zap },
+  { id: "applications" as Page, label: "Applications", Icon: Users },
+  { id: "debug" as Page, label: "Debug", Icon: Bug },
+  { id: "settings" as Page, label: "Settings", Icon: Settings }
 ] as const;
 
 export function App() {
-  const [page, setPage] = useState<Page>("offers");
+  const [page, setPage] = useState<Page>("dashboard");
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50 text-gray-900">
@@ -49,10 +57,14 @@ export function App() {
 
       {/* Main */}
       <main className="flex-1 overflow-y-auto">
+        {page === "dashboard" && <DashboardPage />}
         {page === "offers" && <OffersPage />}
         {page === "search" && <JobSearchPage />}
         {page === "queue" && <ApplyQueuePage />}
         {page === "rapid" && <RapidApplyPage />}
+        {page === "applications" && <ApplicationsPage />}
+        {page === "debug" && <DebugPage />}
+        {page === "settings" && <SettingsPage />}
       </main>
     </div>
   );

@@ -21,6 +21,7 @@ import {
   TechStackChips
 } from "../components/ui";
 import type { Offer } from "../../main/shared/types";
+import { OfferDetailsPage } from "./OfferDetailsPage";
 
 export function OffersPage() {
   const [page, setPage] = useState(1);
@@ -28,6 +29,7 @@ export function OffersPage() {
   const [showAdd, setShowAdd] = useState(false);
   const [url, setUrl] = useState("");
   const [title, setTitle] = useState("");
+  const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -78,56 +80,62 @@ export function OffersPage() {
         </div>
       </div>
 
-      <Card>
-        {isLoading ? (
-          <div className="py-12 text-center text-sm text-gray-400">Loading…</div>
-        ) : !data?.items.length ? (
-          <EmptyState
-            icon={<Briefcase className="h-8 w-8" />}
-            title="No offers yet"
-            description="Add an offer URL to get started"
-            action={
-              <Button size="sm" onClick={() => setShowAdd(true)}>
-                Add Offer
-              </Button>
-            }
-          />
-        ) : (
-          <>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title / URL</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Salary</TableHead>
-                  <TableHead>Tech</TableHead>
-                  <TableHead>Score</TableHead>
-                  <TableHead>Decision</TableHead>
-                  <TableHead className="w-8" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.items.map((offer) => (
-                  <OfferRow
-                    key={offer.id}
-                    offer={offer}
-                    onDelete={() => deleteOffer.mutate(offer.id)}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-            <div className="border-t border-gray-100 px-3 py-2">
-              <Pagination
-                page={data.page}
-                totalPages={data.totalPages}
-                total={data.total}
-                pageSize={data.pageSize}
-                onPageChange={setPage}
-              />
-            </div>
-          </>
-        )}
-      </Card>
+      <div className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
+        <Card>
+          {isLoading ? (
+            <div className="py-12 text-center text-sm text-gray-400">Loading…</div>
+          ) : !data?.items.length ? (
+            <EmptyState
+              icon={<Briefcase className="h-8 w-8" />}
+              title="No offers yet"
+              description="Add an offer URL to get started"
+              action={
+                <Button size="sm" onClick={() => setShowAdd(true)}>
+                  Add Offer
+                </Button>
+              }
+            />
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title / URL</TableHead>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Salary</TableHead>
+                    <TableHead>Tech</TableHead>
+                    <TableHead>Score</TableHead>
+                    <TableHead>Decision</TableHead>
+                    <TableHead className="w-8" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.items.map((offer) => (
+                    <OfferRow
+                      key={offer.id}
+                      offer={offer}
+                      onDelete={() => deleteOffer.mutate(offer.id)}
+                      onSelect={() => setSelectedOffer(offer)}
+                      selected={selectedOffer?.id === offer.id}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+              <div className="border-t border-gray-100 px-3 py-2">
+                <Pagination
+                  page={data.page}
+                  totalPages={data.totalPages}
+                  total={data.total}
+                  pageSize={data.pageSize}
+                  onPageChange={setPage}
+                />
+              </div>
+            </>
+          )}
+        </Card>
+
+        <OfferDetailsPage offer={selectedOffer} />
+      </div>
 
       <Dialog open={showAdd} onClose={() => setShowAdd(false)} title="Add Offer">
         <div className="space-y-3">
@@ -168,9 +176,19 @@ export function OffersPage() {
   );
 }
 
-function OfferRow({ offer, onDelete }: { offer: Offer; onDelete: () => void }) {
+function OfferRow({
+  offer,
+  onDelete,
+  onSelect,
+  selected
+}: {
+  offer: Offer;
+  onDelete: () => void;
+  onSelect: () => void;
+  selected: boolean;
+}) {
   return (
-    <TableRow>
+    <TableRow className={selected ? "bg-blue-50/60" : undefined} onClick={onSelect}>
       <TableCell className="max-w-xs">
         <p className="truncate font-medium text-gray-900">{offer.title ?? "(untitled)"}</p>
         <p className="truncate text-xs text-gray-400">{offer.url}</p>
