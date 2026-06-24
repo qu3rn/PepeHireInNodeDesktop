@@ -36,21 +36,21 @@ export function DashboardPage() {
   return (
     <div className="space-y-4 p-6">
       <div>
-        <h2 className="text-base font-semibold text-gray-900">Dashboard</h2>
-        <p className="mt-1 text-sm text-gray-500">Phase 1 local-only job assistant overview.</p>
+        <h2 className="text-base font-semibold text-[var(--text)]">Dashboard</h2>
+        <p className="mt-1 text-sm text-[var(--text-secondary)]">Phase 1 local-only job assistant overview.</p>
       </div>
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {cards.map(({ label, value, icon: Icon }) => (
           <Card key={label}>
             <CardHeader>
-              <CardTitle className="text-xs font-medium uppercase tracking-wide text-gray-500">
+              <CardTitle className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
                 {label}
               </CardTitle>
-              <Icon className="h-4 w-4 text-gray-300" />
+              <Icon className="h-4 w-4 text-[var(--text-muted)]" />
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-semibold tabular-nums text-gray-900">{value}</p>
+              <p className="text-2xl font-semibold tabular-nums text-[var(--text)]">{value}</p>
             </CardContent>
           </Card>
         ))}
@@ -62,9 +62,9 @@ export function DashboardPage() {
         </CardHeader>
         <CardContent className="flex flex-wrap items-center gap-2">
           <ScoreBadge score={data ? Math.round((data.apply / Math.max(1, data.offers)) * 100) : 0} />
-          <span className="text-xs text-gray-500">Apply: {data?.apply ?? 0}</span>
-          <span className="text-xs text-gray-500">Maybe: {data?.maybe ?? 0}</span>
-          <span className="text-xs text-gray-500">Skip: {data?.skip ?? 0}</span>
+          <span className="text-xs text-[var(--text-secondary)]">Apply: {data?.apply ?? 0}</span>
+          <span className="text-xs text-[var(--text-secondary)]">Maybe: {data?.maybe ?? 0}</span>
+          <span className="text-xs text-[var(--text-secondary)]">Skip: {data?.skip ?? 0}</span>
         </CardContent>
       </Card>
 

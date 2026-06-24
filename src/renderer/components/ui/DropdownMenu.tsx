@@ -35,7 +35,7 @@ export function DropdownMenu({ trigger, items, align = "right", className }: Dro
       {open && (
         <div
           className={cn(
-            "absolute mt-1 min-w-36 rounded-md border border-gray-200 bg-white py-1 shadow-lg z-20",
+            "absolute mt-1 min-w-36 rounded-md border border-[var(--border)] bg-[var(--bg-surface)] py-1 shadow-[var(--shadow)] z-20",
             align === "right" ? "right-0" : "left-0"
           )}
         >
@@ -51,8 +51,8 @@ export function DropdownMenu({ trigger, items, align = "right", className }: Dro
               className={cn(
                 "flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm transition-colors",
                 item.destructive
-                  ? "text-red-600 hover:bg-red-50"
-                  : "text-gray-700 hover:bg-gray-50",
+                  ? "text-[var(--accent)] hover:bg-[var(--accent-soft)]"
+                  : "text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]",
                 item.disabled && "cursor-not-allowed opacity-50"
               )}
             >

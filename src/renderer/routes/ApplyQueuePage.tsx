@@ -45,7 +45,7 @@ export function ApplyQueuePage() {
   return (
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-gray-900">Apply Queue</h2>
+        <h2 className="text-base font-semibold text-[var(--text)]">Apply Queue</h2>
         <Button
           variant="outline"
           size="sm"
@@ -58,14 +58,14 @@ export function ApplyQueuePage() {
       </div>
 
       {build.data && (
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-[var(--text-secondary)]">
           Added {build.data.inserted} item{build.data.inserted !== 1 ? "s" : ""} to queue.
         </p>
       )}
 
       <Card>
         {isLoading ? (
-          <div className="py-12 text-center text-sm text-gray-400">Loading\u2026</div>
+          <div className="py-12 text-center text-sm text-[var(--text-muted)]">Loading\u2026</div>
         ) : !data?.items.length ? (
           <EmptyState
             icon={<ListOrdered className="h-8 w-8" />}
@@ -92,7 +92,7 @@ export function ApplyQueuePage() {
               <TableBody>
                 {data.items.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell className="font-mono text-xs text-gray-500">
+                    <TableCell className="font-mono text-xs text-[var(--text-muted)]">
                       {item.offerId.slice(0, 8)}\u2026
                     </TableCell>
                     <TableCell>
@@ -101,7 +101,7 @@ export function ApplyQueuePage() {
                     <TableCell>
                       <ScoreBadge score={item.priorityScore} />
                     </TableCell>
-                    <TableCell className="text-xs text-gray-500">
+                    <TableCell className="text-xs text-[var(--text-secondary)]">
                       <span className="line-clamp-1">
                         {item.reasons.slice(0, 2).join(" \u00b7 ") || "\u2013"}
                       </span>
@@ -114,7 +114,7 @@ export function ApplyQueuePage() {
                             size="sm"
                             onClick={() => markSent.mutate(item.id)}
                             disabled={markSent.isPending}
-                            className="text-green-600 hover:text-green-700"
+                            className="text-[var(--primary)] hover:text-[#8db7ff]"
                             aria-label="Mark sent"
                           >
                             <Send className="h-3.5 w-3.5" />
@@ -124,7 +124,7 @@ export function ApplyQueuePage() {
                             size="sm"
                             onClick={() => skip.mutate(item.id)}
                             disabled={skip.isPending}
-                            className="text-gray-400 hover:text-red-600"
+                            className="text-[var(--text-muted)] hover:text-[var(--accent)]"
                             aria-label="Skip"
                           >
                             <SkipForward className="h-3.5 w-3.5" />
@@ -136,7 +136,7 @@ export function ApplyQueuePage() {
                 ))}
               </TableBody>
             </Table>
-            <div className="border-t border-gray-100 px-3 py-2">
+            <div className="border-t border-[var(--border)] px-3 py-2">
               <Pagination
                 page={data.page}
                 totalPages={data.totalPages}

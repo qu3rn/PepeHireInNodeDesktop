@@ -43,18 +43,18 @@ export function RapidApplyPage() {
 
   return (
     <div className="space-y-4 p-6">
-      <h2 className="text-base font-semibold text-gray-900">Rapid Apply</h2>
+      <h2 className="text-base font-semibold text-[var(--text)]">Rapid Apply</h2>
 
-      <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5">
-        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-        <p className="text-xs text-amber-700">
+      <div className="flex items-start gap-2 rounded-lg border border-[color:rgba(240,138,42,0.35)] bg-[var(--accent-soft)] px-4 py-2.5">
+        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]" />
+        <p className="text-xs text-[var(--accent-contrast)]">
           <strong>Safety rule:</strong> Final job application submit must remain manual. This
           tool fills forms only &#8212; it never clicks Submit or Apply.
         </p>
       </div>
 
       {isLoading ? (
-        <div className="py-12 text-center text-sm text-gray-400">Loading&#8230;</div>
+        <div className="py-12 text-center text-sm text-[var(--text-muted)]">Loading&#8230;</div>
       ) : !next ? (
         <Card>
           <EmptyState
@@ -75,26 +75,26 @@ export function RapidApplyPage() {
           <CardContent className="space-y-3">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-gray-500">Queue Item</p>
-                <p className="mt-0.5 font-mono text-xs text-gray-700">{next.id.slice(0, 12)}\u2026</p>
+                <p className="text-xs text-[var(--text-muted)]">Queue Item</p>
+                <p className="mt-0.5 font-mono text-xs text-[var(--text-secondary)]">{next.id.slice(0, 12)}\u2026</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Offer</p>
-                <p className="mt-0.5 font-mono text-xs text-gray-700">{next.offerId.slice(0, 12)}\u2026</p>
+                <p className="text-xs text-[var(--text-muted)]">Offer</p>
+                <p className="mt-0.5 font-mono text-xs text-[var(--text-secondary)]">{next.offerId.slice(0, 12)}\u2026</p>
               </div>
             </div>
             {next.reasons.length > 0 && (
               <div>
-                <p className="text-xs text-gray-500">Scoring reasons</p>
+                <p className="text-xs text-[var(--text-muted)]">Scoring reasons</p>
                 <ul className="mt-1 space-y-0.5">
                   {next.reasons.map((r, i) => (
-                    <li key={i} className="text-xs text-gray-600">\u00b7 {r}</li>
+                    <li key={i} className="text-xs text-[var(--text-secondary)]">\u00b7 {r}</li>
                   ))}
                 </ul>
               </div>
             )}
             {fill.data && (
-              <div className="rounded border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-700">
+              <div className="rounded border border-[color:rgba(47,124,255,0.35)] bg-[color:rgba(47,124,255,0.14)] px-3 py-2 text-xs text-[#a5c5ff]">
                 {fill.data.warning}
               </div>
             )}
@@ -122,7 +122,7 @@ export function RapidApplyPage() {
               size="sm"
               onClick={() => skip.mutate(next.id)}
               disabled={skip.isPending}
-              className="ml-auto text-gray-400 hover:text-red-600"
+              className="ml-auto text-[var(--text-muted)] hover:text-[var(--accent)]"
             >
               <SkipForward className="h-3.5 w-3.5" />
               Skip

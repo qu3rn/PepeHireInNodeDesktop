@@ -27,12 +27,12 @@ export function App() {
   const [page, setPage] = useState<Page>("dashboard");
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 text-gray-900">
+    <div className="flex h-screen overflow-hidden bg-[var(--bg)] text-[var(--text)]">
       {/* Sidebar */}
-      <aside className="flex w-48 shrink-0 flex-col border-r border-gray-200 bg-white">
-        <div className="border-b border-gray-100 px-4 py-4">
-          <p className="text-sm font-bold text-gray-900">Pepe Hire</p>
-          <p className="mt-0.5 text-xs text-gray-400">Desktop — Phase 1</p>
+      <aside className="flex w-52 shrink-0 flex-col border-r border-[var(--border)] bg-[var(--bg-elevated)]">
+        <div className="border-b border-[var(--border)] px-4 py-4">
+          <p className="text-sm font-bold text-[var(--text)]">Pepe Hire</p>
+          <p className="mt-0.5 text-xs text-[var(--text-muted)]">Desktop — Phase 1</p>
         </div>
 
         <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2 py-3">
@@ -44,11 +44,11 @@ export function App() {
               className={cn(
                 "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 page === id
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  ? "bg-[color:rgba(47,124,255,0.16)] text-[var(--text)]"
+                  : "text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
               )}
             >
-              <Icon className="h-4 w-4 shrink-0" />
+              <Icon className={cn("h-4 w-4 shrink-0", page === id ? "text-[var(--primary)]" : "text-[var(--text-muted)]")} />
               {label}
             </button>
           ))}
@@ -56,7 +56,7 @@ export function App() {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto bg-[var(--bg)]">
         {page === "dashboard" && <DashboardPage />}
         {page === "offers" && <OffersPage />}
         {page === "search" && <JobSearchPage />}
