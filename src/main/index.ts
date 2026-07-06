@@ -8,6 +8,10 @@ import { registerOffersIpc } from "./ipc/offers.ipc";
 import { registerQueueIpc } from "./ipc/queue.ipc";
 import { registerCollectionIpc } from "./ipc/collection.ipc";
 import { registerRapidApplyIpc } from "./ipc/rapid-apply.ipc";
+import { registerCollectorIpc } from "./ipc/collector.ipc";
+import { BrowserService } from "./collectors/browser.service";
+import { CollectorService } from "./collectors/collector.service";
+import { PracujCollector } from "./collectors/portals/pracuj.collector";
 
 function createMainWindow(): BrowserWindow
 {
@@ -40,10 +44,13 @@ async function bootstrap(): Promise<void>
 
   const offerService = new OfferService(repositories.offers);
   const queueService = new QueueService(repositories.offers, repositories.queue);
+  const browserService = new BrowserService();
+  const collectorService = new CollectorService(repositories.offers, repositories.searchRuns, browserService, [new PracujCollector()]);
 
   registerOffersIpc(offerService);
   registerQueueIpc(queueService);
   registerCollectionIpc(repositories.collectedUrls);
+  registerCollectorIpc(collectorService);
   registerRapidApplyIpc();
 
   createMainWindow();

@@ -3,12 +3,13 @@ import fs from "node:fs";
 import Database from "better-sqlite3";
 import { drizzle, type BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import type { App } from "electron";
-import { applyQueueItemsTable, collectedUrlsTable, offersTable } from "./schema";
+import { applyQueueItemsTable, collectedUrlsTable, collectionRunsTable, offersTable } from "./schema";
 
 const schema = {
   offersTable,
   collectedUrlsTable,
-  applyQueueItemsTable
+  applyQueueItemsTable,
+  collectionRunsTable
 };
 
 export type AppDb = BetterSQLite3Database<typeof schema>;
@@ -42,10 +43,14 @@ export function initSqlite(dbPath: string): DbContext {
     CREATE TABLE IF NOT EXISTS offers (
       id TEXT PRIMARY KEY,
       source TEXT NOT NULL,
+      source_id TEXT,
       url TEXT UNIQUE NOT NULL,
       title TEXT,
       company TEXT,
       location TEXT,
+      remote_mode TEXT,
+      contract_type TEXT,
+      publication_date TEXT,
       salary_raw TEXT,
       salary_min INTEGER,
       salary_max INTEGER,
@@ -86,7 +91,34 @@ export function initSqlite(dbPath: string): DbContext {
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS collection_runs (
+      id TEXT PRIMARY KEY,
+      source TEXT NOT NULL,
+      started_at TEXT NOT NULL,
+      finished_at TEXT,
+      status TEXT NOT NULL,
+      collected_count INTEGER NOT NULL DEFAULT 0,
+      saved_count INTEGER NOT NULL DEFAULT 0,
+      skipped_count INTEGER NOT NULL DEFAULT 0,
+      failed_count INTEGER NOT NULL DEFAULT 0,
+      error_summary TEXT,
+      message TEXT
+    );
   `);
+
+  const addColumnSafely = (statement: string): void => {
+    try {
+      sqlite.exec(statement);
+    } catch {
+      // Column already exists in dev DB. This keeps MVP migrations simple.
+    }
+  };
+
+  addColumnSafely("ALTER TABLE offers ADD COLUMN source_id TEXT;");
+  addColumnSafely("ALTER TABLE offers ADD COLUMN remote_mode TEXT;");
+  addColumnSafely("ALTER TABLE offers ADD COLUMN contract_type TEXT;");
+  addColumnSafely("ALTER TABLE offers ADD COLUMN publication_date TEXT;");
 
   return {
     sqlite,

@@ -36,3 +36,14 @@ export const classifyUrlSchema = z.object({
   url: z.string().url(),
   text: z.string().default("")
 });
+
+export const collectorStartSchema = z.object({
+  source: z.enum(["pracuj", "justjoinit", "rocketjobs", "nofluffjobs"]),
+  phrase: z.string().min(1),
+  location: z.string().optional(),
+  remoteOnly: z.boolean().optional(),
+  pageLimit: z.number().int().min(1).max(50).optional(),
+  resultLimit: z.number().int().min(1).max(500).optional()
+});
+
+export const collectorRunIdSchema = z.string().min(1);

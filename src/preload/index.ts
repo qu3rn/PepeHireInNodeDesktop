@@ -13,6 +13,13 @@ const api: JobAssistantApi = {
     classifyUrl: (input) => ipcRenderer.invoke(IPC_CHANNELS.collectionClassify, input),
     saveCollectedUrl: (input) => ipcRenderer.invoke(IPC_CHANNELS.collectionSave, input)
   },
+  collector: {
+    start: (criteria) => ipcRenderer.invoke(IPC_CHANNELS.collectorStart, criteria),
+    getStatus: (runId) => ipcRenderer.invoke(IPC_CHANNELS.collectorGetStatus, runId),
+    cancel: (runId) => ipcRenderer.invoke(IPC_CHANNELS.collectorCancel, runId),
+    listRuns: () => ipcRenderer.invoke(IPC_CHANNELS.collectorListRuns),
+    getProgress: (runId) => ipcRenderer.invoke(IPC_CHANNELS.collectorGetProgress, runId)
+  },
   queue: {
     list: (query) => ipcRenderer.invoke(IPC_CHANNELS.queueList, query),
     build: () => ipcRenderer.invoke(IPC_CHANNELS.queueBuild),
@@ -26,3 +33,6 @@ const api: JobAssistantApi = {
 };
 
 contextBridge.exposeInMainWorld("jobAssistant", api);
+contextBridge.exposeInMainWorld("pepeHire", {
+  collector: api.collector
+});

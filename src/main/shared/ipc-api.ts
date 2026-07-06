@@ -1,9 +1,12 @@
 import type {
+  CollectorProgress,
   CollectedUrl,
   CreateOfferInput,
   Offer,
   OfferListQuery,
   PaginatedResult,
+  SearchCriteria,
+  SearchRun,
   QueueItem,
   QueueListQuery
 } from "./types";
@@ -26,6 +29,13 @@ export interface JobAssistantApi {
     }>;
     saveCollectedUrl(input: Omit<CollectedUrl, "id" | "createdAt" | "updatedAt">): Promise<CollectedUrl>;
   };
+  collector: {
+    start(criteria: SearchCriteria): Promise<{ runId: string }>;
+    getStatus(runId: string): Promise<SearchRun>;
+    cancel(runId: string): Promise<{ ok: boolean }>;
+    listRuns(): Promise<SearchRun[]>;
+    getProgress(runId: string): Promise<CollectorProgress | null>;
+  };
   queue: {
     list(query: QueueListQuery): Promise<PaginatedResult<QueueItem>>;
     build(): Promise<{ inserted: number }>;
@@ -36,4 +46,8 @@ export interface JobAssistantApi {
   rapidApply: {
     fillItem(id: string): Promise<{ ok: boolean; warning: string }>;
   };
+}
+
+export interface PepeHireApi {
+  collector: JobAssistantApi["collector"];
 }
