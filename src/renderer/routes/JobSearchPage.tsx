@@ -25,6 +25,7 @@ export function JobSearchPage() {
   const [pageLimit, setPageLimit] = useState(3);
   const [resultLimit, setResultLimit] = useState(40);
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
+  const [collectorError, setCollectorError] = useState<string | null>(null);
 
   const classify = useMutation({
     mutationFn: () => apiClient.collection.classifyUrl({ source, url, text: preview })
@@ -48,6 +49,7 @@ export function JobSearchPage() {
 
   const startCollector = useMutation({
     mutationFn: async () => {
+      setCollectorError(null);
       return apiClient.collector.start({
         source,
         phrase,
@@ -59,6 +61,9 @@ export function JobSearchPage() {
     },
     onSuccess: (result) => {
       setActiveRunId(result.runId);
+    },
+    onError: (error) => {
+      setCollectorError(error instanceof Error ? error.message : "Failed to start collector");
     }
   });
 
@@ -111,6 +116,8 @@ export function JobSearchPage() {
   });
 
   const isCollectorRunning = runStatus.data?.status === "running";
+  const runStatusError = runStatus.error instanceof Error ? runStatus.error.message : null;
+  const recentRunsError = recentRuns.error instanceof Error ? recentRuns.error.message : null;
 
   return (
     <div className="space-y-4 p-6">
@@ -192,6 +199,18 @@ export function JobSearchPage() {
                 {cancelCollector.isPending ? "Cancelling..." : "Cancel"}
               </Button>
             </div>
+
+            {collectorError && (
+              <p className="rounded-md border border-[var(--danger)]/30 bg-[var(--danger)]/10 p-2 text-xs text-[var(--danger)]">
+                Start failed: {collectorError}
+              </p>
+            )}
+
+            {runStatusError && (
+              <p className="rounded-md border border-[var(--warning)]/30 bg-[var(--warning)]/10 p-2 text-xs text-[var(--warning)]">
+                Status error: {runStatusError}
+              </p>
+            )}
 
             {activeRunId && (
               <div className="rounded-md border border-[var(--border)] bg-[var(--bg-surface)] p-2 text-xs text-[var(--text-secondary)]">
@@ -342,6 +361,9 @@ export function JobSearchPage() {
               ))}
               {(recentRuns.data ?? []).length === 0 && (
                 <div className="text-xs text-[var(--text-muted)]">No collection runs yet.</div>
+              )}
+              {recentRunsError && (
+                <div className="text-xs text-[var(--warning)]">Unable to load runs: {recentRunsError}</div>
               )}
             </div>
           </CardContent>

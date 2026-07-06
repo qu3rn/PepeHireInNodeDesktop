@@ -25,12 +25,13 @@ function createMainWindow(): BrowserWindow
     }
   });
 
-  if (process.env.NODE_ENV === "development")
+  const rendererUrl = process.env.ELECTRON_RENDERER_URL;
+  if (rendererUrl)
   {
-    void win.loadURL("http://localhost:5173");
+    void win.loadURL(rendererUrl);
   } else
   {
-    void win.loadFile(path.join(__dirname, "../../index.html"));
+    void win.loadFile(path.join(__dirname, "../renderer/index.html"));
   }
 
   return win;
