@@ -10,6 +10,11 @@ export const IPC_CHANNELS = {
   queueMarkSent: "queue:mark-sent",
   collectionClassify: "collection:classify-url",
   collectionSave: "collection:save-url",
+  collectorStart: "collector:start",
+  collectorGetStatus: "collector:get-status",
+  collectorCancel: "collector:cancel",
+  collectorListRuns: "collector:list-runs",
+  collectorGetProgress: "collector:get-progress",
   rapidApplyFill: "rapid-apply:fill-item"
 } as const;
 

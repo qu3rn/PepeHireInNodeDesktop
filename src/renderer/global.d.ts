@@ -1,8 +1,9 @@
-import type { JobAssistantApi } from "../main/shared/ipc-api";
+import type { JobAssistantApi, PepeHireApi } from "../main/shared/ipc-api";
 
 declare global {
   interface Window {
     jobAssistant: JobAssistantApi;
+    pepeHire: PepeHireApi;
   }
 }
 

@@ -34,4 +34,51 @@ describe("sqlite repositories", () => {
     context.sqlite.close();
     fs.rmSync(dbPath, { force: true });
   });
+
+  it("upserts offers by sourceId and normalized url", async () => {
+    const dbPath = path.resolve(process.cwd(), "data", `test-upsert-${Date.now()}.db`);
+    const context = initSqlite(dbPath);
+    const repos = createLocalRepositories(context);
+
+    const first = await repos.offers.upsert({
+      source: "pracuj",
+      sourceId: "abc-123",
+      url: "https://it.pracuj.pl/oferta/react-dev,abc-123?ref=feed",
+      title: "React Dev"
+    });
+
+    expect(first.created).toBe(true);
+
+    const second = await repos.offers.upsert({
+      source: "pracuj",
+      sourceId: "abc-123",
+      url: "https://it.pracuj.pl/oferta/react-dev,abc-123",
+      title: "React Dev Senior"
+    });
+
+    expect(second.created).toBe(false);
+    expect(second.offer.id).toBe(first.offer.id);
+    expect(second.offer.title).toBe("React Dev Senior");
+
+    const third = await repos.offers.upsert({
+      source: "pracuj",
+      url: "https://it.pracuj.pl/oferta/ui-engineer,xyz-999?utm_source=test",
+      title: "UI Engineer"
+    });
+
+    const fourth = await repos.offers.upsert({
+      source: "pracuj",
+      url: "https://it.pracuj.pl/oferta/ui-engineer,xyz-999",
+      title: "UI Engineer Updated"
+    });
+
+    expect(third.offer.id).toBe(fourth.offer.id);
+    expect(fourth.created).toBe(false);
+
+    const all = await repos.offers.all();
+    expect(all.length).toBe(2);
+
+    context.sqlite.close();
+    fs.rmSync(dbPath, { force: true });
+  });
 });

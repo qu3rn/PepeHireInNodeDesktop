@@ -759,6 +759,16 @@ Phase 2:
 - deep extraction
 - queue
 
+Phase 2 current status (desktop local MVP):
+- implemented collector service in main process with Playwright browser service
+- implemented pracuj.pl portal adapter (listing collection)
+- implemented offer upsert/dedup by sourceId or normalized URL
+- implemented search run persistence (collection_runs table)
+- implemented IPC and preload methods: start/getStatus/cancel/listRuns/getProgress
+- implemented Job Search UI collector controls and run summary
+- implemented tests for collector service flow and repository upsert
+- known limits: only pracuj adapter implemented in this phase increment; detail-page deep extraction not yet enabled
+
 Phase 3:
 - Rapid Apply
 - debug UI
