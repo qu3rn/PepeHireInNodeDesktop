@@ -90,6 +90,8 @@ src/
       stack.ts
       description.ts
       title.ts
+    calculators/
+      rateCalculator.ts
     adapters/
       repositories.ts
       local-repositories.ts
@@ -115,6 +117,7 @@ src/
       OfferDetailsPage.tsx
       ApplyQueuePage.tsx
       RapidApplyPage.tsx
+      RateCalculatorPage.tsx
       ApplicationsPage.tsx
       DebugPage.tsx
       SettingsPage.tsx
@@ -745,6 +748,7 @@ Phase 1:
 - repository interfaces + SQLite repos
 - IPC bridge
 - basic UI pages
+- simple Rate Calculator page
 - pagination helpers
 - salary/url/relevance/scoring modules with tests
 
@@ -768,5 +772,6 @@ Acceptance criteria for first vertical slice:
 - Offer is normalized and scored.
 - Offers page shows paginated offers.
 - Queue can be built.
+- Rate Calculator shows simple local B2B/UoP comparisons.
 - Rapid Apply shows next queue item.
 - No auto-submit exists.
