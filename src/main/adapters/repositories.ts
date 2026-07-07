@@ -1,4 +1,5 @@
 import type {
+  ApplicationAttempt,
   BulkDeleteResult,
   CollectedUrl,
   CreateOfferInput,
@@ -48,6 +49,28 @@ export interface SearchRunPatch {
   message?: string | null;
 }
 
+export interface ApplicationAttemptPatch {
+  finishedAt?: string | null;
+  status?: ApplicationAttempt["status"];
+  fieldsDetected?: ApplicationAttempt["fieldsDetected"];
+  fieldsFilled?: string[];
+  fieldsSkipped?: string[];
+  manualActionRequired?: boolean;
+  submitted?: boolean;
+  errorSummary?: string | null;
+  screenshotPath?: string | null;
+  debugLogPath?: string | null;
+}
+
+export interface ApplicationAttemptRepository {
+  list(limit?: number): Promise<ApplicationAttempt[]>;
+  getById(id: string): Promise<ApplicationAttempt | null>;
+  getByOfferId(offerId: string): Promise<ApplicationAttempt[]>;
+  create(input: Omit<ApplicationAttempt, "logs"> & { logs?: string[] }): Promise<ApplicationAttempt>;
+  updateStatus(id: string, patch: ApplicationAttemptPatch): Promise<ApplicationAttempt>;
+  appendLog(id: string, message: string): Promise<ApplicationAttempt>;
+}
+
 export interface SearchRunRepository {
   create(input: Omit<SearchRun, "finishedAt" | "collectedCount" | "savedCount" | "skippedCount" | "failedCount" | "errorSummary" | "message"> & Partial<Pick<SearchRun, "finishedAt" | "collectedCount" | "savedCount" | "skippedCount" | "failedCount" | "errorSummary" | "message">>): Promise<SearchRun>;
   getById(id: string): Promise<SearchRun | null>;
@@ -60,4 +83,5 @@ export interface Repositories {
   queue: QueueRepository;
   collectedUrls: CollectedUrlRepository;
   searchRuns: SearchRunRepository;
+  applicationAttempts: ApplicationAttemptRepository;
 }

@@ -65,3 +65,22 @@ export const collectionRunsTable = sqliteTable("collection_runs", {
   errorSummary: text("error_summary"),
   message: text("message")
 });
+
+export const applicationAttemptsTable = sqliteTable("application_attempts", {
+  id: text("id").primaryKey(),
+  offerId: text("offer_id").notNull(),
+  source: text("source").notNull(),
+  startedAt: text("started_at").notNull(),
+  finishedAt: text("finished_at"),
+  status: text("status").notNull(),
+  fieldsDetectedJson: text("fields_detected_json").notNull().default("[]"),
+  fieldsFilledJson: text("fields_filled_json").notNull().default("[]"),
+  fieldsSkippedJson: text("fields_skipped_json").notNull().default("[]"),
+  manualActionRequired: integer("manual_action_required", { mode: "boolean" }).notNull().default(false),
+  submitted: integer("submitted", { mode: "boolean" }).notNull().default(false),
+  errorSummary: text("error_summary"),
+  screenshotPath: text("screenshot_path"),
+  debugLogPath: text("debug_log_path"),
+  logsJson: text("logs_json").notNull().default("[]"),
+  updatedAt: text("updated_at").notNull()
+});

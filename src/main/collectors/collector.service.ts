@@ -30,6 +30,10 @@ export class CollectorService {
     private readonly portalCollectors: PortalCollector[]
   ) {}
 
+  getActiveRunCount(): number {
+    return this.activeRuns.size;
+  }
+
   async start(criteria: SearchCriteria): Promise<{ runId: string }> {
     const runId = randomUUID();
     const startedAt = new Date().toISOString();

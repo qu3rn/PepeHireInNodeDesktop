@@ -28,11 +28,24 @@ const api: JobAssistantApi = {
     markSent: (id) => ipcRenderer.invoke(IPC_CHANNELS.queueMarkSent, id)
   },
   rapidApply: {
-    fillItem: (id) => ipcRenderer.invoke(IPC_CHANNELS.rapidApplyFill, id)
+    fillItem: (id) => ipcRenderer.invoke(IPC_CHANNELS.rapidApplyFill, id),
+    inspect: (offerId) => ipcRenderer.invoke(IPC_CHANNELS.rapidApplyInspect, offerId),
+    prepare: (input) => ipcRenderer.invoke(IPC_CHANNELS.rapidApplyPrepare, input),
+    submit: (input) => ipcRenderer.invoke(IPC_CHANNELS.rapidApplySubmit, input),
+    cancel: (attemptId) => ipcRenderer.invoke(IPC_CHANNELS.rapidApplyCancel, attemptId),
+    getStatus: (attemptId) => ipcRenderer.invoke(IPC_CHANNELS.rapidApplyGetStatus, attemptId),
+    listAttempts: () => ipcRenderer.invoke(IPC_CHANNELS.rapidApplyListAttempts)
+  },
+  debug: {
+    getDiagnostics: () => ipcRenderer.invoke(IPC_CHANNELS.debugGetDiagnostics),
+    ping: () => ipcRenderer.invoke(IPC_CHANNELS.debugPing),
+    clearLogs: () => ipcRenderer.invoke(IPC_CHANNELS.debugClearLogs)
   }
 };
 
 contextBridge.exposeInMainWorld("jobAssistant", api);
 contextBridge.exposeInMainWorld("pepeHire", {
-  collector: api.collector
+  collector: api.collector,
+  rapidApply: api.rapidApply,
+  debug: api.debug
 });

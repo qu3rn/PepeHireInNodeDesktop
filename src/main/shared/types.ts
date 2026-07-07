@@ -1,6 +1,15 @@
 export type Decision = "apply" | "maybe" | "skip";
 export type OfferSource = "manual" | "pracuj" | "justjoinit" | "rocketjobs" | "nofluffjobs";
 export type SearchRunStatus = "running" | "completed" | "cancelled" | "failed";
+export type RapidApplyStatus =
+  | "created"
+  | "inspecting"
+  | "prepared"
+  | "submitting"
+  | "manual_action_required"
+  | "submitted"
+  | "failed"
+  | "cancelled";
 
 export interface Offer {
   id: string;
@@ -163,6 +172,110 @@ export interface CollectorProgress {
   offersSaved: number;
   status: SearchRunStatus;
   message: string;
+}
+
+export interface CandidateProfile {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  cvFilePath?: string;
+  coverLetter?: string;
+  expectedSalary?: string;
+  noticePeriod?: string;
+  consent?: boolean;
+}
+
+export interface RapidApplyField {
+  key: string;
+  label: string;
+  type: "text" | "email" | "phone" | "file" | "textarea" | "select" | "radio" | "checkbox" | "unknown";
+  required: boolean;
+  options?: string[];
+}
+
+export interface RapidApplyInput {
+  offerId: string;
+  attemptId?: string;
+  candidate: CandidateProfile;
+  confirmationChecked?: boolean;
+}
+
+export interface RapidApplyPreview {
+  attemptId: string;
+  offerId: string;
+  source: OfferSource;
+  compatible: boolean;
+  fieldsDetected: RapidApplyField[];
+  fieldsMapped: string[];
+  missingRequired: string[];
+  warnings: string[];
+  manualActionRequired: boolean;
+}
+
+export interface RapidApplyResult {
+  attemptId: string;
+  status: RapidApplyStatus;
+  submitted: boolean;
+  manualActionRequired: boolean;
+  message: string;
+  fieldsFilled: string[];
+  fieldsSkipped: string[];
+  screenshotPath?: string | null;
+  debugLogPath?: string | null;
+}
+
+export interface ApplicationAttempt {
+  id: string;
+  offerId: string;
+  source: OfferSource;
+  startedAt: string;
+  finishedAt: string | null;
+  status: RapidApplyStatus;
+  fieldsDetected: RapidApplyField[];
+  fieldsFilled: string[];
+  fieldsSkipped: string[];
+  manualActionRequired: boolean;
+  submitted: boolean;
+  errorSummary: string | null;
+  screenshotPath: string | null;
+  debugLogPath: string | null;
+  logs: string[];
+  updatedAt: string;
+}
+
+export interface AppError {
+  code:
+    | "UNSUPPORTED_PORTAL"
+    | "MISSING_CV"
+    | "REQUIRED_FIELD_UNAVAILABLE"
+    | "SELECTOR_CHANGED"
+    | "BROWSER_LAUNCH_FAILURE"
+    | "NAVIGATION_TIMEOUT"
+    | "BLOCKED_PAGE"
+    | "CAPTCHA_MANUAL_ACTION_REQUIRED"
+    | "SUBMISSION_RESULT_UNKNOWN"
+    | "REPOSITORY_FAILURE"
+    | "INVALID_CANDIDATE_PROFILE";
+  message: string;
+  recoverable: boolean;
+  details?: string;
+}
+
+export interface DebugDiagnostics {
+  appVersion: string;
+  electronVersion: string;
+  nodeVersion: string;
+  chromiumVersion: string;
+  isPackaged: boolean;
+  dbPath: string;
+  dataDir: string;
+  logPath: string;
+  registeredIpcChannels: string[];
+  activeCollectorRuns: number;
+  activeRapidApplySessions: number;
+  recentApplicationAttempts: ApplicationAttempt[];
+  recentErrors: string[];
+  browserStatus: "idle" | "busy";
 }
 
 export interface PaginatedResult<T> {

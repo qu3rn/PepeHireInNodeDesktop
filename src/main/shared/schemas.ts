@@ -47,3 +47,26 @@ export const collectorStartSchema = z.object({
 });
 
 export const collectorRunIdSchema = z.string().min(1);
+
+export const candidateProfileSchema = z.object({
+  fullName: z.string().optional(),
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
+  cvFilePath: z.string().optional(),
+  coverLetter: z.string().optional(),
+  expectedSalary: z.string().optional(),
+  noticePeriod: z.string().optional(),
+  consent: z.boolean().optional()
+});
+
+export const rapidApplyPrepareSchema = z.object({
+  offerId: z.string().min(1),
+  attemptId: z.string().optional(),
+  candidate: candidateProfileSchema,
+  confirmationChecked: z.boolean().optional()
+});
+
+export const rapidApplySubmitSchema = rapidApplyPrepareSchema.extend({
+  attemptId: z.string().min(1),
+  confirmationChecked: z.boolean()
+});

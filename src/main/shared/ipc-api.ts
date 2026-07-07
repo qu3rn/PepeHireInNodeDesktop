@@ -1,4 +1,6 @@
 import type {
+  ApplicationAttempt,
+  DebugDiagnostics,
   CollectorProgress,
   CollectedUrl,
   CreateOfferInput,
@@ -45,9 +47,22 @@ export interface JobAssistantApi {
   };
   rapidApply: {
     fillItem(id: string): Promise<{ ok: boolean; warning: string }>;
+    inspect(offerId: string): Promise<import("./types").RapidApplyPreview>;
+    prepare(input: import("./types").RapidApplyInput): Promise<import("./types").RapidApplyPreview>;
+    submit(input: import("./types").RapidApplyInput): Promise<import("./types").RapidApplyResult>;
+    cancel(attemptId: string): Promise<{ ok: boolean }>;
+    getStatus(attemptId: string): Promise<ApplicationAttempt | null>;
+    listAttempts(): Promise<ApplicationAttempt[]>;
+  };
+  debug: {
+    getDiagnostics(): Promise<DebugDiagnostics>;
+    ping(): Promise<{ ok: boolean; at: string }>;
+    clearLogs(): Promise<{ ok: boolean }>;
   };
 }
 
 export interface PepeHireApi {
   collector: JobAssistantApi["collector"];
+  rapidApply: JobAssistantApi["rapidApply"];
+  debug: JobAssistantApi["debug"];
 }

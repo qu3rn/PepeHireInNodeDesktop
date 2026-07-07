@@ -3,13 +3,14 @@ import fs from "node:fs";
 import Database from "better-sqlite3";
 import { drizzle, type BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import type { App } from "electron";
-import { applyQueueItemsTable, collectedUrlsTable, collectionRunsTable, offersTable } from "./schema";
+import { applicationAttemptsTable, applyQueueItemsTable, collectedUrlsTable, collectionRunsTable, offersTable } from "./schema";
 
 const schema = {
   offersTable,
   collectedUrlsTable,
   applyQueueItemsTable,
-  collectionRunsTable
+  collectionRunsTable,
+  applicationAttemptsTable
 };
 
 export type AppDb = BetterSQLite3Database<typeof schema>;
@@ -104,6 +105,25 @@ export function initSqlite(dbPath: string): DbContext {
       failed_count INTEGER NOT NULL DEFAULT 0,
       error_summary TEXT,
       message TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS application_attempts (
+      id TEXT PRIMARY KEY,
+      offer_id TEXT NOT NULL,
+      source TEXT NOT NULL,
+      started_at TEXT NOT NULL,
+      finished_at TEXT,
+      status TEXT NOT NULL,
+      fields_detected_json TEXT NOT NULL DEFAULT '[]',
+      fields_filled_json TEXT NOT NULL DEFAULT '[]',
+      fields_skipped_json TEXT NOT NULL DEFAULT '[]',
+      manual_action_required INTEGER NOT NULL DEFAULT 0,
+      submitted INTEGER NOT NULL DEFAULT 0,
+      error_summary TEXT,
+      screenshot_path TEXT,
+      debug_log_path TEXT,
+      logs_json TEXT NOT NULL DEFAULT '[]',
+      updated_at TEXT NOT NULL
     );
   `);
 
