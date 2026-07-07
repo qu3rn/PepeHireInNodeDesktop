@@ -15,7 +15,16 @@ export const IPC_CHANNELS = {
   collectorCancel: "collector:cancel",
   collectorListRuns: "collector:list-runs",
   collectorGetProgress: "collector:get-progress",
-  rapidApplyFill: "rapid-apply:fill-item"
+  rapidApplyFill: "rapid-apply:fill-item",
+  rapidApplyInspect: "rapid-apply:inspect",
+  rapidApplyPrepare: "rapid-apply:prepare",
+  rapidApplySubmit: "rapid-apply:submit",
+  rapidApplyCancel: "rapid-apply:cancel",
+  rapidApplyGetStatus: "rapid-apply:get-status",
+  rapidApplyListAttempts: "rapid-apply:list-attempts",
+  debugGetDiagnostics: "debug:get-diagnostics",
+  debugPing: "debug:ping",
+  debugClearLogs: "debug:clear-logs"
 } as const;
 
 export const PAGE_SIZES = {

@@ -9,9 +9,14 @@ import { registerQueueIpc } from "./ipc/queue.ipc";
 import { registerCollectionIpc } from "./ipc/collection.ipc";
 import { registerRapidApplyIpc } from "./ipc/rapid-apply.ipc";
 import { registerCollectorIpc } from "./ipc/collector.ipc";
+import { registerDebugIpc } from "./ipc/debug.ipc";
 import { BrowserService } from "./collectors/browser.service";
 import { CollectorService } from "./collectors/collector.service";
 import { PracujCollector } from "./collectors/portals/pracuj.collector";
+import { AppLogger } from "./logging/logger";
+import { RapidApplyService } from "./rapid-apply/rapid-apply.service";
+import { PracujRapidApplyAdapter } from "./rapid-apply/portals/pracuj.apply";
+import { JustJoinItRapidApplyAdapter } from "./rapid-apply/portals/justjoinit.apply";
 
 function createMainWindow(): BrowserWindow
 {
@@ -40,19 +45,37 @@ function createMainWindow(): BrowserWindow
 async function bootstrap(): Promise<void>
 {
   const dbPath = resolveDbPath(app);
+  const dataDir = path.dirname(dbPath);
   const dbContext = initSqlite(dbPath);
   const repositories = createLocalRepositories(dbContext);
+  const logger = new AppLogger(dataDir);
 
   const offerService = new OfferService(repositories.offers);
   const queueService = new QueueService(repositories.offers, repositories.queue);
   const browserService = new BrowserService();
   const collectorService = new CollectorService(repositories.offers, repositories.searchRuns, browserService, [new PracujCollector()]);
+  const rapidApplyService = new RapidApplyService(
+    repositories.offers,
+    repositories.applicationAttempts,
+    logger,
+    [new PracujRapidApplyAdapter(browserService), new JustJoinItRapidApplyAdapter()]
+  );
 
   registerOffersIpc(offerService);
   registerQueueIpc(queueService);
   registerCollectionIpc(repositories.collectedUrls);
   registerCollectorIpc(collectorService);
-  registerRapidApplyIpc();
+  registerRapidApplyIpc(rapidApplyService);
+  registerDebugIpc({
+    appVersion: app.getVersion(),
+    isPackaged: app.isPackaged,
+    dbPath,
+    dataDir,
+    logger,
+    collectorService,
+    rapidApplyService,
+    repositories
+  });
 
   createMainWindow();
 }
