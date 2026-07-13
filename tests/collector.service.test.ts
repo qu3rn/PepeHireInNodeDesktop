@@ -14,6 +14,7 @@ class InMemoryOffersRepo implements OfferRepository {
       source: input.source,
       sourceId: input.sourceId ?? null,
       url: input.url,
+      normalizedUrl: input.normalizedUrl ?? input.url,
       title: input.title ?? null,
       company: input.company ?? null,
       location: input.location ?? null,
@@ -32,6 +33,11 @@ class InMemoryOffersRepo implements OfferRepository {
       score: input.score ?? null,
       decision: input.decision ?? null,
       reasons: input.reasons ?? [],
+      status: input.status ?? "new", relevanceScore: input.relevanceScore ?? input.score ?? null,
+      fingerprint: input.fingerprint ?? "", searchableText: input.searchableText ?? "",
+      firstSeenAt: input.firstSeenAt ?? new Date().toISOString(), lastSeenAt: input.lastSeenAt ?? new Date().toISOString(),
+      lastCheckedAt: input.lastCheckedAt ?? null, availability: input.availability ?? "unknown", changedAt: input.changedAt ?? null,
+      pinned: input.pinned ?? false, notes: input.notes ?? null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
