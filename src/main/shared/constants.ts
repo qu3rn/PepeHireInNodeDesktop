@@ -25,6 +25,9 @@ export const IPC_CHANNELS = {
   debugGetDiagnostics: "debug:get-diagnostics",
   debugPing: "debug:ping",
   debugClearLogs: "debug:clear-logs"
+  ,jobIndexSearch:"job-index:search", jobIndexCollect:"job-index:collect", jobIndexReindex:"job-index:reindex",
+  jobIndexCleanupPreview:"job-index:cleanup-preview", jobIndexCleanupExecute:"job-index:cleanup-execute",
+  jobIndexRecheck:"job-index:recheck", jobIndexUpdateStatus:"job-index:update-status"
 } as const;
 
 export const PAGE_SIZES = {

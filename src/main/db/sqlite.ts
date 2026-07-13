@@ -3,14 +3,14 @@ import fs from "node:fs";
 import Database from "better-sqlite3";
 import { drizzle, type BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import type { App } from "electron";
-import { applicationAttemptsTable, applyQueueItemsTable, collectedUrlsTable, collectionRunsTable, offersTable } from "./schema";
+import { applicationAttemptsTable, applyQueueItemsTable, collectedUrlsTable, collectionRunsTable, offersTable, offerChangesTable } from "./schema";
 
 const schema = {
   offersTable,
   collectedUrlsTable,
   applyQueueItemsTable,
   collectionRunsTable,
-  applicationAttemptsTable
+  applicationAttemptsTable, offerChangesTable
 };
 
 export type AppDb = BetterSQLite3Database<typeof schema>;
@@ -46,6 +46,7 @@ export function initSqlite(dbPath: string): DbContext {
       source TEXT NOT NULL,
       source_id TEXT,
       url TEXT UNIQUE NOT NULL,
+      normalized_url TEXT,
       title TEXT,
       company TEXT,
       location TEXT,
@@ -64,6 +65,10 @@ export function initSqlite(dbPath: string): DbContext {
       score INTEGER,
       decision TEXT,
       reasons_json TEXT NOT NULL DEFAULT '[]',
+      status TEXT NOT NULL DEFAULT 'new', relevance_score INTEGER, fingerprint TEXT,
+      searchable_text TEXT NOT NULL DEFAULT '', first_seen_at TEXT, last_seen_at TEXT,
+      last_checked_at TEXT, availability TEXT NOT NULL DEFAULT 'unknown', changed_at TEXT,
+      pinned INTEGER NOT NULL DEFAULT 0, notes TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
@@ -139,6 +144,13 @@ export function initSqlite(dbPath: string): DbContext {
   addColumnSafely("ALTER TABLE offers ADD COLUMN remote_mode TEXT;");
   addColumnSafely("ALTER TABLE offers ADD COLUMN contract_type TEXT;");
   addColumnSafely("ALTER TABLE offers ADD COLUMN publication_date TEXT;");
+  for (const column of [
+    "normalized_url TEXT", "status TEXT NOT NULL DEFAULT 'new'", "relevance_score INTEGER", "fingerprint TEXT",
+    "searchable_text TEXT NOT NULL DEFAULT ''", "first_seen_at TEXT", "last_seen_at TEXT", "last_checked_at TEXT",
+    "availability TEXT NOT NULL DEFAULT 'unknown'", "changed_at TEXT", "pinned INTEGER NOT NULL DEFAULT 0", "notes TEXT"
+  ]) addColumnSafely(`ALTER TABLE offers ADD COLUMN ${column};`);
+  sqlite.exec(`CREATE TABLE IF NOT EXISTS offer_changes (id TEXT PRIMARY KEY, offer_id TEXT NOT NULL, field TEXT NOT NULL, old_value TEXT, new_value TEXT, detected_at TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS job_index_runs (id TEXT PRIMARY KEY, operation TEXT NOT NULL, options_json TEXT NOT NULL, summary_json TEXT NOT NULL, started_at TEXT NOT NULL, finished_at TEXT NOT NULL);`);
 
   return {
     sqlite,

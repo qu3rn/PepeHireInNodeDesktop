@@ -17,6 +17,9 @@ import { AppLogger } from "./logging/logger";
 import { RapidApplyService } from "./rapid-apply/rapid-apply.service";
 import { PracujRapidApplyAdapter } from "./rapid-apply/portals/pracuj.apply";
 import { JustJoinItRapidApplyAdapter } from "./rapid-apply/portals/justjoinit.apply";
+import { AvailabilityService } from "./job-index/availability.service";
+import { JobIndexService } from "./job-index/job-index.service";
+import { registerJobIndexIpc } from "./ipc/job-index.ipc";
 
 function createMainWindow(): BrowserWindow
 {
@@ -54,6 +57,8 @@ async function bootstrap(): Promise<void>
   const queueService = new QueueService(repositories.offers, repositories.queue);
   const browserService = new BrowserService();
   const collectorService = new CollectorService(repositories.offers, repositories.searchRuns, browserService, [new PracujCollector()]);
+  const availabilityService = new AvailabilityService(browserService, repositories.offers);
+  const jobIndexService = new JobIndexService(repositories.offers, collectorService, availabilityService, logger);
   const rapidApplyService = new RapidApplyService(
     repositories.offers,
     repositories.applicationAttempts,
@@ -65,6 +70,7 @@ async function bootstrap(): Promise<void>
   registerQueueIpc(queueService);
   registerCollectionIpc(repositories.collectedUrls);
   registerCollectorIpc(collectorService);
+  registerJobIndexIpc(jobIndexService);
   registerRapidApplyIpc(rapidApplyService);
   registerDebugIpc({
     appVersion: app.getVersion(),
