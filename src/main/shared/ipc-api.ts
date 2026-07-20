@@ -14,6 +14,15 @@ import type {
 } from "./types";
 
 export interface JobAssistantApi {
+  jobIndex: {
+    search(filters: import("../job-index/job-index.types").JobIndexFilters): Promise<import("../job-index/job-index.types").JobIndexSearchResult>;
+    collect(criteria: import("../job-index/job-index.types").JobIndexCriteria): Promise<{runIds:string[]}>;
+    reindex(options?: import("../job-index/job-index.types").ReindexOptions): Promise<import("../job-index/job-index.types").ReindexSummary>;
+    cleanupPreview(options: import("../job-index/job-index.types").CleanupOptions): Promise<import("../job-index/job-index.types").CleanupPreview>;
+    cleanupExecute(options: import("../job-index/job-index.types").CleanupExecuteOptions): Promise<import("../job-index/job-index.types").CleanupSummary>;
+    recheck(options?: import("../job-index/job-index.types").AvailabilityOptions): Promise<import("../job-index/job-index.types").AvailabilitySummary>;
+    updateStatus(offerId:string, status:import("./types").OfferStatus): Promise<Offer>;
+  };
   offers: {
     list(query: OfferListQuery): Promise<PaginatedResult<Offer>>;
     get(id: string): Promise<Offer | null>;
@@ -62,6 +71,7 @@ export interface JobAssistantApi {
 }
 
 export interface PepeHireApi {
+  jobIndex: JobAssistantApi["jobIndex"];
   collector: JobAssistantApi["collector"];
   rapidApply: JobAssistantApi["rapidApply"];
   debug: JobAssistantApi["debug"];

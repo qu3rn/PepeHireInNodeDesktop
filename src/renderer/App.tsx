@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { BarChart3, Briefcase, Bug, Calculator, ListOrdered, Settings, Search, Users, Zap } from "lucide-react";
+import { Archive, BarChart3, Briefcase, Bug, Calculator, ListOrdered, Settings, Search, Users, Zap } from "lucide-react";
+import { JobIndexPage } from "./routes/JobIndexPage";
 import { cn } from "./lib/cn";
 import { DashboardPage } from "./routes/DashboardPage";
 import { OffersPage } from "./routes/OffersPage";
@@ -11,11 +12,12 @@ import { ApplicationsPage } from "./routes/ApplicationsPage";
 import { DebugPage } from "./routes/DebugPage";
 import { SettingsPage } from "./routes/SettingsPage";
 
-type Page = "dashboard" | "offers" | "search" | "queue" | "rapid" | "calculator" | "applications" | "debug" | "settings";
+type Page = "dashboard" | "offers" | "jobIndex" | "search" | "queue" | "rapid" | "calculator" | "applications" | "debug" | "settings";
 
 const NAV_ITEMS = [
   { id: "dashboard" as Page, label: "Dashboard", Icon: BarChart3 },
   { id: "offers" as Page, label: "Offers", Icon: Briefcase },
+  { id: "jobIndex" as Page, label: "Job Index", Icon: Archive },
   { id: "search" as Page, label: "Job Search", Icon: Search },
   { id: "queue" as Page, label: "Apply Queue", Icon: ListOrdered },
   { id: "rapid" as Page, label: "Rapid Apply", Icon: Zap },
@@ -61,6 +63,7 @@ export function App() {
       <main className="flex-1 overflow-y-auto bg-[var(--bg)]">
         {page === "dashboard" && <DashboardPage />}
         {page === "offers" && <OffersPage />}
+        {page === "jobIndex" && <JobIndexPage />}
         {page === "search" && <JobSearchPage />}
         {page === "queue" && <ApplyQueuePage />}
         {page === "rapid" && <RapidApplyPage />}

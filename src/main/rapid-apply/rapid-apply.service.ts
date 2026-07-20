@@ -251,6 +251,6 @@ export class RapidApplyService {
   }
 
   private resolveAdapter(offer: { source: string }): RapidApplyAdapter | null {
-    return this.adapters.find((adapter) => adapter.source === offer.source);
+    return this.adapters.find((adapter) => adapter.source === offer.source) ?? null;
   }
 }

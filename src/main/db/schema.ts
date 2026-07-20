@@ -5,6 +5,7 @@ export const offersTable = sqliteTable("offers", {
   source: text("source").notNull(),
   sourceId: text("source_id"),
   url: text("url").notNull().unique(),
+  normalizedUrl: text("normalized_url"),
   title: text("title"),
   company: text("company"),
   location: text("location"),
@@ -23,6 +24,17 @@ export const offersTable = sqliteTable("offers", {
   score: integer("score"),
   decision: text("decision"),
   reasonsJson: text("reasons_json").notNull().default("[]"),
+  status: text("status").notNull().default("new"),
+  relevanceScore: integer("relevance_score"),
+  fingerprint: text("fingerprint"),
+  searchableText: text("searchable_text").notNull().default(""),
+  firstSeenAt: text("first_seen_at"),
+  lastSeenAt: text("last_seen_at"),
+  lastCheckedAt: text("last_checked_at"),
+  availability: text("availability").notNull().default("unknown"),
+  changedAt: text("changed_at"),
+  pinned: integer("pinned", { mode: "boolean" }).notNull().default(false),
+  notes: text("notes"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull()
 });
@@ -83,4 +95,9 @@ export const applicationAttemptsTable = sqliteTable("application_attempts", {
   debugLogPath: text("debug_log_path"),
   logsJson: text("logs_json").notNull().default("[]"),
   updatedAt: text("updated_at").notNull()
+});
+
+export const offerChangesTable = sqliteTable("offer_changes", {
+  id: text("id").primaryKey(), offerId: text("offer_id").notNull(), field: text("field").notNull(),
+  oldValue: text("old_value"), newValue: text("new_value"), detectedAt: text("detected_at").notNull()
 });

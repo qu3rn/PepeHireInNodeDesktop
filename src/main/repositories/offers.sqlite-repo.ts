@@ -1,6 +1,6 @@
 import { and, desc, eq, like, or, sql } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
-import { offersTable } from "../db/schema";
+import { offersTable, offerChangesTable } from "../db/schema";
 import type { AppDb } from "../db/sqlite";
 import type { OfferRepository } from "../adapters/repositories";
 import type {
@@ -12,6 +12,7 @@ import type {
   UpdateOfferInput
 } from "../shared/types";
 import { normalizePagination } from "../shared/pagination";
+import { buildSearchableText, createOfferFingerprint, normalizeOfferUrl } from "../job-index/fingerprint";
 
 function mapOffer(row: typeof offersTable.$inferSelect): Offer {
   return {
@@ -19,6 +20,7 @@ function mapOffer(row: typeof offersTable.$inferSelect): Offer {
     source: row.source,
     sourceId: row.sourceId,
     url: row.url,
+    normalizedUrl: row.normalizedUrl ?? normalizeOfferUrl(row.url),
     title: row.title,
     company: row.company,
     location: row.location,
@@ -37,6 +39,17 @@ function mapOffer(row: typeof offersTable.$inferSelect): Offer {
     score: row.score,
     decision: (row.decision as Offer["decision"]) ?? null,
     reasons: JSON.parse(row.reasonsJson),
+    status: (row.status as Offer["status"]) ?? "new",
+    relevanceScore: row.relevanceScore ?? row.score,
+    fingerprint: row.fingerprint ?? createOfferFingerprint(row.title, row.company, row.location),
+    searchableText: row.searchableText ?? "",
+    firstSeenAt: row.firstSeenAt ?? row.createdAt,
+    lastSeenAt: row.lastSeenAt ?? row.updatedAt,
+    lastCheckedAt: row.lastCheckedAt,
+    availability: (row.availability as Offer["availability"]) ?? "unknown",
+    changedAt: row.changedAt,
+    pinned: row.pinned ?? false,
+    notes: row.notes,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt
   };
@@ -58,17 +71,7 @@ export class OffersSqliteRepository implements OfferRepository {
     return trimmed.length > 0 ? trimmed : null;
   }
 
-  private normalizeUrl(url: string): string {
-    try {
-      const parsed = new URL(url.trim());
-      parsed.hash = "";
-      parsed.search = "";
-      const pathname = parsed.pathname.replace(/\/+$/, "") || "/";
-      return `${parsed.origin.toLowerCase()}${pathname}`;
-    } catch {
-      return url.trim();
-    }
-  }
+  private normalizeUrl(url: string): string { return normalizeOfferUrl(url); }
 
   private async findExistingForUpsert(input: CreateOfferInput): Promise<Offer | null> {
     const normalizedSourceId = this.normalizeSourceId(input);
@@ -85,7 +88,10 @@ export class OffersSqliteRepository implements OfferRepository {
     const normalizedInputUrl = this.normalizeUrl(input.url);
     const all = await this.db.query.offersTable.findMany();
     const byUrl = all.find((row) => this.normalizeUrl(row.url) === normalizedInputUrl);
-    return byUrl ? mapOffer(byUrl) : null;
+    if (byUrl) return mapOffer(byUrl);
+    const fingerprint = input.fingerprint ?? createOfferFingerprint(input.title, input.company, input.location);
+    const byFingerprint = fingerprint ? all.find((row) => (row.fingerprint ?? createOfferFingerprint(row.title, row.company, row.location)) === fingerprint) : undefined;
+    return byFingerprint ? mapOffer(byFingerprint) : null;
   }
 
   private buildCreateValues(id: string, now: string, input: CreateOfferInput): typeof offersTable.$inferInsert {
@@ -94,6 +100,7 @@ export class OffersSqliteRepository implements OfferRepository {
       source: input.source,
       sourceId: this.normalizeSourceId(input) ?? null,
       url: input.url,
+      normalizedUrl: input.normalizedUrl ?? normalizeOfferUrl(input.url),
       title: input.title ?? null,
       company: input.company ?? null,
       location: input.location ?? null,
@@ -112,6 +119,12 @@ export class OffersSqliteRepository implements OfferRepository {
       score: input.score ?? null,
       decision: input.decision ?? null,
       reasonsJson: JSON.stringify(input.reasons ?? []),
+      status: input.status ?? "new", relevanceScore: input.relevanceScore ?? input.score ?? null,
+      fingerprint: input.fingerprint ?? createOfferFingerprint(input.title, input.company, input.location),
+      searchableText: input.searchableText ?? buildSearchableText(input), firstSeenAt: input.firstSeenAt ?? now,
+      lastSeenAt: input.lastSeenAt ?? now, lastCheckedAt: input.lastCheckedAt ?? null,
+      availability: input.availability ?? "unknown", changedAt: input.changedAt ?? null,
+      pinned: input.pinned ?? false, notes: input.notes ?? null,
       createdAt: now,
       updatedAt: now
     };
@@ -119,6 +132,8 @@ export class OffersSqliteRepository implements OfferRepository {
 
   private buildUpdateValues(patch: UpdateOfferInput): Partial<typeof offersTable.$inferInsert> {
     return {
+      url: patch.url,
+      normalizedUrl: patch.normalizedUrl,
       sourceId: this.normalizeSourceId(patch),
       title: patch.title,
       company: patch.company,
@@ -138,6 +153,10 @@ export class OffersSqliteRepository implements OfferRepository {
       score: patch.score,
       decision: patch.decision,
       reasonsJson: patch.reasons ? JSON.stringify(patch.reasons) : undefined,
+      status: patch.status, relevanceScore: patch.relevanceScore, fingerprint: patch.fingerprint,
+      searchableText: patch.searchableText, firstSeenAt: patch.firstSeenAt, lastSeenAt: patch.lastSeenAt,
+      lastCheckedAt: patch.lastCheckedAt, availability: patch.availability, changedAt: patch.changedAt,
+      pinned: patch.pinned, notes: patch.notes,
       updatedAt: new Date().toISOString()
     };
   }
@@ -245,6 +264,8 @@ export class OffersSqliteRepository implements OfferRepository {
     }
 
     const merged: UpdateOfferInput = {
+      url: input.url,
+      normalizedUrl: input.normalizedUrl ?? normalizeOfferUrl(input.url),
       sourceId: this.normalizeSourceId(input),
       title: input.title ?? existing.title,
       company: input.company ?? existing.company,
@@ -264,8 +285,24 @@ export class OffersSqliteRepository implements OfferRepository {
       score: input.score ?? existing.score,
       decision: input.decision ?? existing.decision,
       reasons: input.reasons && input.reasons.length > 0 ? input.reasons : existing.reasons
+      ,status: ["saved", "applied", "ignored"].includes(existing.status) ? existing.status : (input.status ?? existing.status),
+      relevanceScore: input.relevanceScore ?? input.score ?? existing.relevanceScore,
+      fingerprint: input.fingerprint ?? createOfferFingerprint(input.title ?? existing.title, input.company ?? existing.company, input.location ?? existing.location),
+      searchableText: input.searchableText ?? buildSearchableText({ ...existing, ...input }),
+      firstSeenAt: existing.firstSeenAt, lastSeenAt: new Date().toISOString(), lastCheckedAt: existing.lastCheckedAt,
+      availability: existing.availability, changedAt: existing.changedAt, pinned: existing.pinned, notes: existing.notes
     };
 
+    const meaningful: Array<keyof Offer> = ["title", "description", "contractType", "remoteMode", "salaryRaw"];
+    const detectedAt = new Date().toISOString();
+    for (const field of meaningful) {
+      const oldValue = existing[field];
+      const newValue = field === "title" ? merged.title : field === "description" ? merged.description : field === "contractType" ? merged.contractType : field === "remoteMode" ? merged.remoteMode : merged.salaryRaw;
+      if (newValue !== undefined && JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
+        await this.db.insert(offerChangesTable).values({ id: randomUUID(), offerId: existing.id, field, oldValue: oldValue == null ? null : String(oldValue), newValue: newValue == null ? null : String(newValue), detectedAt });
+        merged.changedAt = detectedAt;
+      }
+    }
     const offer = await this.update(existing.id, merged);
     return { offer, created: false };
   }

@@ -769,6 +769,8 @@ Phase 2 current status (desktop local MVP):
 - implemented tests for collector service flow and repository upsert
 - known limits: only pracuj adapter implemented in this phase increment; detail-page deep extraction not yet enabled
 
+Job Index documentation: see `docs/job-index.md` for archive filters, lifecycle statuses, extraction stages, deduplication, reindexing, cleanup/retention safety, and test instructions.
+
 Phase 3:
 - Rapid Apply
 - debug UI

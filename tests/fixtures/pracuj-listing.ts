@@ -1,0 +1,2 @@
+import type { RawOfferListingItem } from "../../src/main/collectors/raw-offer.types";
+export const pracujRawListing: RawOfferListingItem = { sourceId:"abc-123", url:"/oferta/react-developer,abc-123?ref=test", title:"  Senior   React Developer ", company:" Acme ", location:"Warszawa", salaryRaw:"20 000 PLN / mies.", shortDescription:"React and TypeScript", publicationDate:"2026-07-01", warnings:[] };

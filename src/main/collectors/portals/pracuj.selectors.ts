@@ -1,0 +1,1 @@
+export const PRACUJ_SELECTORS = { card:"[data-test='default-offer']", link:"a[data-test='link-offer']", title:"h2", company:"[data-test='text-company-name']", location:"[data-test='offer-badge-description']", salary:"[data-test='offer-salary']", description:"[data-test='section-benefit']", publicationDate:"time" } as const;

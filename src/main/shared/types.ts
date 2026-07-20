@@ -1,4 +1,6 @@
 export type Decision = "apply" | "maybe" | "skip";
+export type OfferStatus = "new" | "seen" | "saved" | "applied" | "ignored" | "expired" | "invalid";
+export type AvailabilityState = "active" | "expired" | "unavailable" | "redirected" | "unknown";
 export type OfferSource = "manual" | "pracuj" | "justjoinit" | "rocketjobs" | "nofluffjobs";
 export type SearchRunStatus = "running" | "completed" | "cancelled" | "failed";
 export type RapidApplyStatus =
@@ -16,6 +18,7 @@ export interface Offer {
   source: string;
   sourceId: string | null;
   url: string;
+  normalizedUrl: string;
   title: string | null;
   company: string | null;
   location: string | null;
@@ -34,6 +37,17 @@ export interface Offer {
   score: number | null;
   decision: Decision | null;
   reasons: string[];
+  status: OfferStatus;
+  relevanceScore: number | null;
+  fingerprint: string;
+  searchableText: string;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  lastCheckedAt: string | null;
+  availability: AvailabilityState;
+  changedAt: string | null;
+  pinned: boolean;
+  notes: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -49,6 +63,7 @@ export interface CreateOfferInput {
   source: string;
   sourceId?: string | null;
   url: string;
+  normalizedUrl?: string;
   title?: string | null;
   company?: string | null;
   location?: string | null;
@@ -67,9 +82,22 @@ export interface CreateOfferInput {
   score?: number | null;
   decision?: Decision | null;
   reasons?: string[];
+  status?: OfferStatus;
+  relevanceScore?: number | null;
+  fingerprint?: string;
+  searchableText?: string;
+  firstSeenAt?: string;
+  lastSeenAt?: string;
+  lastCheckedAt?: string | null;
+  availability?: AvailabilityState;
+  changedAt?: string | null;
+  pinned?: boolean;
+  notes?: string | null;
 }
 
 export interface UpdateOfferInput {
+  url?: string;
+  normalizedUrl?: string;
   sourceId?: string | null;
   title?: string | null;
   company?: string | null;
@@ -89,6 +117,17 @@ export interface UpdateOfferInput {
   score?: number | null;
   decision?: Decision | null;
   reasons?: string[];
+  status?: OfferStatus;
+  relevanceScore?: number | null;
+  fingerprint?: string;
+  searchableText?: string;
+  firstSeenAt?: string;
+  lastSeenAt?: string;
+  lastCheckedAt?: string | null;
+  availability?: AvailabilityState;
+  changedAt?: string | null;
+  pinned?: boolean;
+  notes?: string | null;
 }
 
 export interface QueueItem {

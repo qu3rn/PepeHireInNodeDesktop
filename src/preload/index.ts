@@ -3,6 +3,12 @@ import { IPC_CHANNELS } from "../main/shared/constants";
 import type { JobAssistantApi } from "../main/shared/ipc-api";
 
 const api: JobAssistantApi = {
+  jobIndex: {
+    search:(filters)=>ipcRenderer.invoke(IPC_CHANNELS.jobIndexSearch,filters), collect:(criteria)=>ipcRenderer.invoke(IPC_CHANNELS.jobIndexCollect,criteria),
+    reindex:(options)=>ipcRenderer.invoke(IPC_CHANNELS.jobIndexReindex,options), cleanupPreview:(options)=>ipcRenderer.invoke(IPC_CHANNELS.jobIndexCleanupPreview,options),
+    cleanupExecute:(options)=>ipcRenderer.invoke(IPC_CHANNELS.jobIndexCleanupExecute,options), recheck:(options)=>ipcRenderer.invoke(IPC_CHANNELS.jobIndexRecheck,options),
+    updateStatus:(offerId,status)=>ipcRenderer.invoke(IPC_CHANNELS.jobIndexUpdateStatus,{offerId,status})
+  },
   offers: {
     list: (query) => ipcRenderer.invoke(IPC_CHANNELS.offersList, query),
     get: (id) => ipcRenderer.invoke(IPC_CHANNELS.offersGet, id),
@@ -45,6 +51,7 @@ const api: JobAssistantApi = {
 
 contextBridge.exposeInMainWorld("jobAssistant", api);
 contextBridge.exposeInMainWorld("pepeHire", {
+  jobIndex: api.jobIndex,
   collector: api.collector,
   rapidApply: api.rapidApply,
   debug: api.debug
