@@ -65,7 +65,7 @@ export function initSqlite(dbPath: string): DbContext {
       score INTEGER,
       decision TEXT,
       reasons_json TEXT NOT NULL DEFAULT '[]',
-      status TEXT NOT NULL DEFAULT 'new', relevance_score INTEGER, fingerprint TEXT,
+      status TEXT NOT NULL DEFAULT 'new', relevance_score INTEGER, profile_relevance_decision TEXT, search_profile_id TEXT, fingerprint TEXT,
       searchable_text TEXT NOT NULL DEFAULT '', first_seen_at TEXT, last_seen_at TEXT,
       last_checked_at TEXT, availability TEXT NOT NULL DEFAULT 'unknown', changed_at TEXT,
       pinned INTEGER NOT NULL DEFAULT 0, notes TEXT,
@@ -145,7 +145,7 @@ export function initSqlite(dbPath: string): DbContext {
   addColumnSafely("ALTER TABLE offers ADD COLUMN contract_type TEXT;");
   addColumnSafely("ALTER TABLE offers ADD COLUMN publication_date TEXT;");
   for (const column of [
-    "normalized_url TEXT", "status TEXT NOT NULL DEFAULT 'new'", "relevance_score INTEGER", "fingerprint TEXT",
+    "normalized_url TEXT", "status TEXT NOT NULL DEFAULT 'new'", "relevance_score INTEGER", "profile_relevance_decision TEXT", "search_profile_id TEXT", "fingerprint TEXT",
     "searchable_text TEXT NOT NULL DEFAULT ''", "first_seen_at TEXT", "last_seen_at TEXT", "last_checked_at TEXT",
     "availability TEXT NOT NULL DEFAULT 'unknown'", "changed_at TEXT", "pinned INTEGER NOT NULL DEFAULT 0", "notes TEXT"
   ]) addColumnSafely(`ALTER TABLE offers ADD COLUMN ${column};`);

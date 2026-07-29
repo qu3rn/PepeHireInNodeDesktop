@@ -4,10 +4,29 @@ import type { JobAssistantApi } from "../main/shared/ipc-api";
 
 const api: JobAssistantApi = {
   jobIndex: {
-    search:(filters)=>ipcRenderer.invoke(IPC_CHANNELS.jobIndexSearch,filters), collect:(criteria)=>ipcRenderer.invoke(IPC_CHANNELS.jobIndexCollect,criteria),
-    reindex:(options)=>ipcRenderer.invoke(IPC_CHANNELS.jobIndexReindex,options), cleanupPreview:(options)=>ipcRenderer.invoke(IPC_CHANNELS.jobIndexCleanupPreview,options),
-    cleanupExecute:(options)=>ipcRenderer.invoke(IPC_CHANNELS.jobIndexCleanupExecute,options), recheck:(options)=>ipcRenderer.invoke(IPC_CHANNELS.jobIndexRecheck,options),
-    updateStatus:(offerId,status)=>ipcRenderer.invoke(IPC_CHANNELS.jobIndexUpdateStatus,{offerId,status})
+    search: (filters) =>
+      ipcRenderer.invoke(IPC_CHANNELS.jobIndexSearch, filters),
+    collect: (criteria) =>
+      ipcRenderer.invoke(IPC_CHANNELS.jobIndexCollect, criteria),
+    reindex: (options) =>
+      ipcRenderer.invoke(IPC_CHANNELS.jobIndexReindex, options),
+    cleanupPreview: (options) =>
+      ipcRenderer.invoke(IPC_CHANNELS.jobIndexCleanupPreview, options),
+    cleanupExecute: (options) =>
+      ipcRenderer.invoke(IPC_CHANNELS.jobIndexCleanupExecute, options),
+    recheck: (options) =>
+      ipcRenderer.invoke(IPC_CHANNELS.jobIndexRecheck, options),
+    updateStatus: (offerId, status) =>
+      ipcRenderer.invoke(IPC_CHANNELS.jobIndexUpdateStatus, {
+        offerId,
+        status
+      }),
+    listProfiles: () => ipcRenderer.invoke(IPC_CHANNELS.jobIndexListProfiles),
+    updateRelevance: (offerId, relevant) =>
+      ipcRenderer.invoke(IPC_CHANNELS.jobIndexUpdateRelevance, {
+        offerId,
+        relevant
+      })
   },
   offers: {
     list: (query) => ipcRenderer.invoke(IPC_CHANNELS.offersList, query),
@@ -16,30 +35,40 @@ const api: JobAssistantApi = {
     delete: (id) => ipcRenderer.invoke(IPC_CHANNELS.offersDelete, id)
   },
   collection: {
-    classifyUrl: (input) => ipcRenderer.invoke(IPC_CHANNELS.collectionClassify, input),
-    saveCollectedUrl: (input) => ipcRenderer.invoke(IPC_CHANNELS.collectionSave, input)
+    classifyUrl: (input) =>
+      ipcRenderer.invoke(IPC_CHANNELS.collectionClassify, input),
+    saveCollectedUrl: (input) =>
+      ipcRenderer.invoke(IPC_CHANNELS.collectionSave, input)
   },
   collector: {
-    start: (criteria) => ipcRenderer.invoke(IPC_CHANNELS.collectorStart, criteria),
-    getStatus: (runId) => ipcRenderer.invoke(IPC_CHANNELS.collectorGetStatus, runId),
+    start: (criteria) =>
+      ipcRenderer.invoke(IPC_CHANNELS.collectorStart, criteria),
+    getStatus: (runId) =>
+      ipcRenderer.invoke(IPC_CHANNELS.collectorGetStatus, runId),
     cancel: (runId) => ipcRenderer.invoke(IPC_CHANNELS.collectorCancel, runId),
     listRuns: () => ipcRenderer.invoke(IPC_CHANNELS.collectorListRuns),
-    getProgress: (runId) => ipcRenderer.invoke(IPC_CHANNELS.collectorGetProgress, runId)
+    getProgress: (runId) =>
+      ipcRenderer.invoke(IPC_CHANNELS.collectorGetProgress, runId)
   },
   queue: {
     list: (query) => ipcRenderer.invoke(IPC_CHANNELS.queueList, query),
     build: () => ipcRenderer.invoke(IPC_CHANNELS.queueBuild),
     getNext: () => ipcRenderer.invoke(IPC_CHANNELS.queueGetNext),
-    skip: (id, reason) => ipcRenderer.invoke(IPC_CHANNELS.queueSkip, { id, reason }),
+    skip: (id, reason) =>
+      ipcRenderer.invoke(IPC_CHANNELS.queueSkip, { id, reason }),
     markSent: (id) => ipcRenderer.invoke(IPC_CHANNELS.queueMarkSent, id)
   },
   rapidApply: {
     fillItem: (id) => ipcRenderer.invoke(IPC_CHANNELS.rapidApplyFill, id),
-    inspect: (offerId) => ipcRenderer.invoke(IPC_CHANNELS.rapidApplyInspect, offerId),
-    prepare: (input) => ipcRenderer.invoke(IPC_CHANNELS.rapidApplyPrepare, input),
+    inspect: (offerId) =>
+      ipcRenderer.invoke(IPC_CHANNELS.rapidApplyInspect, offerId),
+    prepare: (input) =>
+      ipcRenderer.invoke(IPC_CHANNELS.rapidApplyPrepare, input),
     submit: (input) => ipcRenderer.invoke(IPC_CHANNELS.rapidApplySubmit, input),
-    cancel: (attemptId) => ipcRenderer.invoke(IPC_CHANNELS.rapidApplyCancel, attemptId),
-    getStatus: (attemptId) => ipcRenderer.invoke(IPC_CHANNELS.rapidApplyGetStatus, attemptId),
+    cancel: (attemptId) =>
+      ipcRenderer.invoke(IPC_CHANNELS.rapidApplyCancel, attemptId),
+    getStatus: (attemptId) =>
+      ipcRenderer.invoke(IPC_CHANNELS.rapidApplyGetStatus, attemptId),
     listAttempts: () => ipcRenderer.invoke(IPC_CHANNELS.rapidApplyListAttempts)
   },
   debug: {

@@ -12,7 +12,11 @@ import type {
   UpdateOfferInput
 } from "../shared/types";
 import { normalizePagination } from "../shared/pagination";
-import { buildSearchableText, createOfferFingerprint, normalizeOfferUrl } from "../job-index/fingerprint";
+import {
+  buildSearchableText,
+  createOfferFingerprint,
+  normalizeOfferUrl
+} from "../job-index/fingerprint";
 
 function mapOffer(row: typeof offersTable.$inferSelect): Offer {
   return {
@@ -41,7 +45,12 @@ function mapOffer(row: typeof offersTable.$inferSelect): Offer {
     reasons: JSON.parse(row.reasonsJson),
     status: (row.status as Offer["status"]) ?? "new",
     relevanceScore: row.relevanceScore ?? row.score,
-    fingerprint: row.fingerprint ?? createOfferFingerprint(row.title, row.company, row.location),
+    relevanceDecision:
+      (row.relevanceDecision as Offer["relevanceDecision"]) ?? null,
+    searchProfileId: row.searchProfileId,
+    fingerprint:
+      row.fingerprint ??
+      createOfferFingerprint(row.title, row.company, row.location),
     searchableText: row.searchableText ?? "",
     firstSeenAt: row.firstSeenAt ?? row.createdAt,
     lastSeenAt: row.lastSeenAt ?? row.updatedAt,
@@ -58,7 +67,9 @@ function mapOffer(row: typeof offersTable.$inferSelect): Offer {
 export class OffersSqliteRepository implements OfferRepository {
   constructor(private readonly db: AppDb) {}
 
-  private normalizeSourceId(input: CreateOfferInput | UpdateOfferInput): string | null | undefined {
+  private normalizeSourceId(
+    input: CreateOfferInput | UpdateOfferInput
+  ): string | null | undefined {
     if (!("sourceId" in input)) {
       return undefined;
     }
@@ -71,13 +82,20 @@ export class OffersSqliteRepository implements OfferRepository {
     return trimmed.length > 0 ? trimmed : null;
   }
 
-  private normalizeUrl(url: string): string { return normalizeOfferUrl(url); }
+  private normalizeUrl(url: string): string {
+    return normalizeOfferUrl(url);
+  }
 
-  private async findExistingForUpsert(input: CreateOfferInput): Promise<Offer | null> {
+  private async findExistingForUpsert(
+    input: CreateOfferInput
+  ): Promise<Offer | null> {
     const normalizedSourceId = this.normalizeSourceId(input);
     if (normalizedSourceId) {
       const bySourceId = await this.db.query.offersTable.findFirst({
-        where: and(eq(offersTable.source, input.source), eq(offersTable.sourceId, normalizedSourceId))
+        where: and(
+          eq(offersTable.source, input.source),
+          eq(offersTable.sourceId, normalizedSourceId)
+        )
       });
 
       if (bySourceId) {
@@ -87,14 +105,29 @@ export class OffersSqliteRepository implements OfferRepository {
 
     const normalizedInputUrl = this.normalizeUrl(input.url);
     const all = await this.db.query.offersTable.findMany();
-    const byUrl = all.find((row) => this.normalizeUrl(row.url) === normalizedInputUrl);
+    const byUrl = all.find(
+      (row) => this.normalizeUrl(row.url) === normalizedInputUrl
+    );
     if (byUrl) return mapOffer(byUrl);
-    const fingerprint = input.fingerprint ?? createOfferFingerprint(input.title, input.company, input.location);
-    const byFingerprint = fingerprint ? all.find((row) => (row.fingerprint ?? createOfferFingerprint(row.title, row.company, row.location)) === fingerprint) : undefined;
+    const fingerprint =
+      input.fingerprint ??
+      createOfferFingerprint(input.title, input.company, input.location);
+    const byFingerprint = fingerprint
+      ? all.find(
+          (row) =>
+            (row.fingerprint ??
+              createOfferFingerprint(row.title, row.company, row.location)) ===
+            fingerprint
+        )
+      : undefined;
     return byFingerprint ? mapOffer(byFingerprint) : null;
   }
 
-  private buildCreateValues(id: string, now: string, input: CreateOfferInput): typeof offersTable.$inferInsert {
+  private buildCreateValues(
+    id: string,
+    now: string,
+    input: CreateOfferInput
+  ): typeof offersTable.$inferInsert {
     return {
       id,
       source: input.source,
@@ -119,18 +152,29 @@ export class OffersSqliteRepository implements OfferRepository {
       score: input.score ?? null,
       decision: input.decision ?? null,
       reasonsJson: JSON.stringify(input.reasons ?? []),
-      status: input.status ?? "new", relevanceScore: input.relevanceScore ?? input.score ?? null,
-      fingerprint: input.fingerprint ?? createOfferFingerprint(input.title, input.company, input.location),
-      searchableText: input.searchableText ?? buildSearchableText(input), firstSeenAt: input.firstSeenAt ?? now,
-      lastSeenAt: input.lastSeenAt ?? now, lastCheckedAt: input.lastCheckedAt ?? null,
-      availability: input.availability ?? "unknown", changedAt: input.changedAt ?? null,
-      pinned: input.pinned ?? false, notes: input.notes ?? null,
+      status: input.status ?? "new",
+      relevanceScore: input.relevanceScore ?? input.score ?? null,
+      relevanceDecision: input.relevanceDecision ?? null,
+      searchProfileId: input.searchProfileId ?? null,
+      fingerprint:
+        input.fingerprint ??
+        createOfferFingerprint(input.title, input.company, input.location),
+      searchableText: input.searchableText ?? buildSearchableText(input),
+      firstSeenAt: input.firstSeenAt ?? now,
+      lastSeenAt: input.lastSeenAt ?? now,
+      lastCheckedAt: input.lastCheckedAt ?? null,
+      availability: input.availability ?? "unknown",
+      changedAt: input.changedAt ?? null,
+      pinned: input.pinned ?? false,
+      notes: input.notes ?? null,
       createdAt: now,
       updatedAt: now
     };
   }
 
-  private buildUpdateValues(patch: UpdateOfferInput): Partial<typeof offersTable.$inferInsert> {
+  private buildUpdateValues(
+    patch: UpdateOfferInput
+  ): Partial<typeof offersTable.$inferInsert> {
     return {
       url: patch.url,
       normalizedUrl: patch.normalizedUrl,
@@ -148,15 +192,26 @@ export class OffersSqliteRepository implements OfferRepository {
       salaryPeriod: patch.salaryPeriod,
       salaryMonthlyMin: patch.salaryMonthlyMin,
       salaryMonthlyMax: patch.salaryMonthlyMax,
-      technologiesJson: patch.technologies ? JSON.stringify(patch.technologies) : undefined,
+      technologiesJson: patch.technologies
+        ? JSON.stringify(patch.technologies)
+        : undefined,
       description: patch.description,
       score: patch.score,
       decision: patch.decision,
       reasonsJson: patch.reasons ? JSON.stringify(patch.reasons) : undefined,
-      status: patch.status, relevanceScore: patch.relevanceScore, fingerprint: patch.fingerprint,
-      searchableText: patch.searchableText, firstSeenAt: patch.firstSeenAt, lastSeenAt: patch.lastSeenAt,
-      lastCheckedAt: patch.lastCheckedAt, availability: patch.availability, changedAt: patch.changedAt,
-      pinned: patch.pinned, notes: patch.notes,
+      status: patch.status,
+      relevanceScore: patch.relevanceScore,
+      relevanceDecision: patch.relevanceDecision,
+      searchProfileId: patch.searchProfileId,
+      fingerprint: patch.fingerprint,
+      searchableText: patch.searchableText,
+      firstSeenAt: patch.firstSeenAt,
+      lastSeenAt: patch.lastSeenAt,
+      lastCheckedAt: patch.lastCheckedAt,
+      availability: patch.availability,
+      changedAt: patch.changedAt,
+      pinned: patch.pinned,
+      notes: patch.notes,
       updatedAt: new Date().toISOString()
     };
   }
@@ -165,7 +220,9 @@ export class OffersSqliteRepository implements OfferRepository {
     const now = new Date().toISOString();
     const id = randomUUID();
 
-    await this.db.insert(offersTable).values(this.buildCreateValues(id, now, input));
+    await this.db
+      .insert(offersTable)
+      .values(this.buildCreateValues(id, now, input));
 
     const created = await this.getById(id);
     if (!created) {
@@ -194,7 +251,13 @@ export class OffersSqliteRepository implements OfferRepository {
 
     if (query.search) {
       const pattern = `%${query.search}%`;
-      filters.push(or(like(offersTable.title, pattern), like(offersTable.company, pattern), like(offersTable.url, pattern)));
+      filters.push(
+        or(
+          like(offersTable.title, pattern),
+          like(offersTable.company, pattern),
+          like(offersTable.url, pattern)
+        )
+      );
     }
 
     if (query.decision) {
@@ -228,7 +291,10 @@ export class OffersSqliteRepository implements OfferRepository {
   }
 
   async update(id: string, patch: UpdateOfferInput): Promise<Offer> {
-    await this.db.update(offersTable).set(this.buildUpdateValues(patch)).where(eq(offersTable.id, id));
+    await this.db
+      .update(offersTable)
+      .set(this.buildUpdateValues(patch))
+      .where(eq(offersTable.id, id));
 
     const updated = await this.getById(id);
     if (!updated) {
@@ -247,7 +313,9 @@ export class OffersSqliteRepository implements OfferRepository {
       return { deletedCount: 0 };
     }
 
-    const result = await this.db.delete(offersTable).where(sql`${offersTable.id} in ${ids}`);
+    const result = await this.db
+      .delete(offersTable)
+      .where(sql`${offersTable.id} in ${ids}`);
     return { deletedCount: result.changes ?? 0 };
   }
 
@@ -256,7 +324,9 @@ export class OffersSqliteRepository implements OfferRepository {
     return rows.map(mapOffer);
   }
 
-  async upsert(input: CreateOfferInput): Promise<{ offer: Offer; created: boolean }> {
+  async upsert(
+    input: CreateOfferInput
+  ): Promise<{ offer: Offer; created: boolean }> {
     const existing = await this.findExistingForUpsert(input);
     if (!existing) {
       const created = await this.create(input);
@@ -280,26 +350,78 @@ export class OffersSqliteRepository implements OfferRepository {
       salaryPeriod: input.salaryPeriod ?? existing.salaryPeriod,
       salaryMonthlyMin: input.salaryMonthlyMin ?? existing.salaryMonthlyMin,
       salaryMonthlyMax: input.salaryMonthlyMax ?? existing.salaryMonthlyMax,
-      technologies: input.technologies && input.technologies.length > 0 ? input.technologies : existing.technologies,
+      technologies:
+        input.technologies && input.technologies.length > 0
+          ? input.technologies
+          : existing.technologies,
       description: input.description ?? existing.description,
       score: input.score ?? existing.score,
       decision: input.decision ?? existing.decision,
-      reasons: input.reasons && input.reasons.length > 0 ? input.reasons : existing.reasons
-      ,status: ["saved", "applied", "ignored"].includes(existing.status) ? existing.status : (input.status ?? existing.status),
-      relevanceScore: input.relevanceScore ?? input.score ?? existing.relevanceScore,
-      fingerprint: input.fingerprint ?? createOfferFingerprint(input.title ?? existing.title, input.company ?? existing.company, input.location ?? existing.location),
-      searchableText: input.searchableText ?? buildSearchableText({ ...existing, ...input }),
-      firstSeenAt: existing.firstSeenAt, lastSeenAt: new Date().toISOString(), lastCheckedAt: existing.lastCheckedAt,
-      availability: existing.availability, changedAt: existing.changedAt, pinned: existing.pinned, notes: existing.notes
+      reasons:
+        input.reasons && input.reasons.length > 0
+          ? input.reasons
+          : existing.reasons,
+      status:
+        existing.pinned ||
+        ["saved", "applied", "ignored"].includes(existing.status)
+          ? existing.status
+          : (input.status ?? existing.status),
+      relevanceScore:
+        input.relevanceScore ?? input.score ?? existing.relevanceScore,
+      relevanceDecision: input.relevanceDecision ?? existing.relevanceDecision,
+      searchProfileId: input.searchProfileId ?? existing.searchProfileId,
+      fingerprint:
+        input.fingerprint ??
+        createOfferFingerprint(
+          input.title ?? existing.title,
+          input.company ?? existing.company,
+          input.location ?? existing.location
+        ),
+      searchableText:
+        input.searchableText ?? buildSearchableText({ ...existing, ...input }),
+      firstSeenAt: existing.firstSeenAt,
+      lastSeenAt: new Date().toISOString(),
+      lastCheckedAt: existing.lastCheckedAt,
+      availability: existing.availability,
+      changedAt: existing.changedAt,
+      pinned: existing.pinned,
+      notes: existing.notes
     };
 
-    const meaningful: Array<keyof Offer> = ["title", "description", "contractType", "remoteMode", "salaryRaw"];
+    const meaningful: Array<keyof Offer> = [
+      "title",
+      "description",
+      "contractType",
+      "remoteMode",
+      "salaryRaw"
+    ];
     const detectedAt = new Date().toISOString();
     for (const field of meaningful) {
       const oldValue = existing[field];
-      const newValue = field === "title" ? merged.title : field === "description" ? merged.description : field === "contractType" ? merged.contractType : field === "remoteMode" ? merged.remoteMode : merged.salaryRaw;
-      if (newValue !== undefined && JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
-        await this.db.insert(offerChangesTable).values({ id: randomUUID(), offerId: existing.id, field, oldValue: oldValue == null ? null : String(oldValue), newValue: newValue == null ? null : String(newValue), detectedAt });
+      const newValue =
+        field === "title"
+          ? merged.title
+          : field === "description"
+            ? merged.description
+            : field === "contractType"
+              ? merged.contractType
+              : field === "remoteMode"
+                ? merged.remoteMode
+                : merged.salaryRaw;
+      if (
+        newValue !== undefined &&
+        JSON.stringify(oldValue) !== JSON.stringify(newValue)
+      ) {
+        await this.db
+          .insert(offerChangesTable)
+          .values({
+            id: randomUUID(),
+            offerId: existing.id,
+            field,
+            oldValue: oldValue == null ? null : String(oldValue),
+            newValue: newValue == null ? null : String(newValue),
+            detectedAt
+          });
         merged.changedAt = detectedAt;
       }
     }

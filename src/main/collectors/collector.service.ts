@@ -5,6 +5,7 @@ import { scoreOffer } from "../services/scoring.service";
 import type { CollectorProgress, SearchCriteria, SearchRun } from "../shared/types";
 import { BrowserService } from "./browser.service";
 import type { PortalCollector } from "./collector.types";
+import { FRONTEND_REACT_PROFILE, scoreOfferForProfile } from "../job-index/search-profile";
 
 interface CollectorRunState {
   runId: string;
@@ -140,6 +141,12 @@ export class CollectorService {
             salaryMonthlyMin: parsedSalary?.monthlyMin ?? null,
             salaryRaw: item.salaryRaw ?? null
           });
+          const profile = criteria.searchProfile ?? FRONTEND_REACT_PROFILE;
+          const profileScore = scoreOfferForProfile({
+            title: item.title,
+            technologies: item.technologies,
+            description: item.shortDescription
+          }, profile);
 
           const result = await this.offersRepo.upsert({
             source: item.source,
@@ -162,7 +169,11 @@ export class CollectorService {
             description: item.shortDescription ?? null,
             score: score.score,
             decision: score.decision,
-            reasons: score.reasons
+            reasons: [...profileScore.reasons, ...score.reasons],
+            relevanceScore: profileScore.score,
+            relevanceDecision: profileScore.decision,
+            searchProfileId: profile.id,
+            status: profileScore.decision === "match" ? "new" : "low_relevance"
           });
 
           if (result.created) {

@@ -15,6 +15,7 @@ import {
   Input,
   Pagination,
   SalaryDisplay,
+  ScoreBadge,
   Select,
   StatusBadge,
   Table,
@@ -44,6 +45,8 @@ export function JobIndexPage() {
   const [minSalary, setMinSalary] = useState(""),
     [days, setDays] = useState("30"),
     [message, setMessage] = useState("");
+  const [searchProfileId, setSearchProfileId] = useState("frontend-react");
+  const [showLowRelevance, setShowLowRelevance] = useState(false);
   const qc = useQueryClient();
   const [phrase, setPhrase] = useState("React Frontend"),
     [portals, setPortals] = useState<
@@ -60,7 +63,8 @@ export function JobIndexPage() {
       location,
       status,
       source,
-      minSalary
+      minSalary,
+      showLowRelevance
     ],
     queryFn: () =>
       apiClient.jobIndex.search({
@@ -74,14 +78,24 @@ export function JobIndexPage() {
         statuses: status ? [status as OfferStatus] : undefined,
         sources: source ? [source as never] : undefined,
         minimumSalary: minSalary ? Number(minSalary) : undefined,
+        showLowRelevance,
         sortBy: "lastSeen",
         sortDirection: "desc"
       })
+  });
+  const profiles = useQuery({
+    queryKey: ["job-index-profiles"],
+    queryFn: () => apiClient.jobIndex.listProfiles()
   });
   const refresh = () => void qc.invalidateQueries({ queryKey: ["job-index"] });
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: OfferStatus }) =>
       apiClient.jobIndex.updateStatus(id, status),
+    onSuccess: refresh
+  });
+  const relevanceMutation = useMutation({
+    mutationFn: ({ id, relevant }: { id: string; relevant: boolean }) =>
+      apiClient.jobIndex.updateRelevance(id, relevant),
     onSuccess: refresh
   });
   const reindex = useMutation({
@@ -128,7 +142,8 @@ export function JobIndexPage() {
         excludeKeywords: split(exclude),
         minimumSalary: minSalary ? Number(minSalary) : undefined,
         pageLimit: 3,
-        resultLimit: 100
+        resultLimit: 100,
+        searchProfileId
       }),
     onSuccess: (x) =>
       setMessage(
@@ -163,16 +178,57 @@ export function JobIndexPage() {
       </div>
       <Card className="p-3">
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <Input className="w-56" placeholder="Collector search phrase" value={phrase} onChange={(e) => setPhrase(e.target.value)} />
-          {(["pracuj", "justjoinit", "rocketjobs", "nofluffjobs"] as const).map((portal) => (
-            <label key={portal} className="flex items-center gap-1 text-xs">
-              <input type="checkbox" checked={portals.includes(portal)} onChange={(e) => setPortals(e.target.checked ? [...portals, portal] : portals.filter((x) => x !== portal))} />
-              {portal}
-            </label>
-          ))}
-          <Button size="sm" disabled={!phrase || !portals.length || collect.isPending} onClick={() => collect.mutate()}>
+          <Select
+            className="w-44"
+            value={searchProfileId}
+            onChange={(e) => setSearchProfileId(e.target.value)}
+            aria-label="Search Profile"
+          >
+            {(profiles.data ?? []).map((profile) => (
+              <option key={profile.id} value={profile.id}>
+                {profile.name}
+              </option>
+            ))}
+          </Select>
+          <Input
+            className="w-56"
+            placeholder="Collector search phrase"
+            value={phrase}
+            onChange={(e) => setPhrase(e.target.value)}
+          />
+          {(["pracuj", "justjoinit", "rocketjobs", "nofluffjobs"] as const).map(
+            (portal) => (
+              <label key={portal} className="flex items-center gap-1 text-xs">
+                <input
+                  type="checkbox"
+                  checked={portals.includes(portal)}
+                  onChange={(e) =>
+                    setPortals(
+                      e.target.checked
+                        ? [...portals, portal]
+                        : portals.filter((x) => x !== portal)
+                    )
+                  }
+                />
+                {portal}
+              </label>
+            )
+          )}
+          <Button
+            size="sm"
+            disabled={!phrase || !portals.length || collect.isPending}
+            onClick={() => collect.mutate()}
+          >
             <Search className="h-3.5 w-3.5" /> Collect selected portals
           </Button>
+          <label className="ml-auto flex items-center gap-1.5 text-xs">
+            <input
+              type="checkbox"
+              checked={showLowRelevance}
+              onChange={(e) => setShowLowRelevance(e.target.checked)}
+            />{" "}
+            Show low relevance
+          </label>
         </div>
         <div className="grid gap-2 md:grid-cols-3 xl:grid-cols-6">
           <Input
@@ -225,6 +281,7 @@ export function JobIndexPage() {
               "saved",
               "applied",
               "ignored",
+              "low_relevance",
               "expired",
               "invalid"
             ].map((x) => (
@@ -304,7 +361,22 @@ export function JobIndexPage() {
                     <TableCell>
                       <TechStackChips technologies={o.technologies} max={4} />
                     </TableCell>
-                    <TableCell>{o.relevanceScore ?? o.score ?? "–"}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <ScoreBadge score={o.relevanceScore} />
+                        <StatusBadge
+                          status={o.relevanceDecision ?? "unknown"}
+                        />
+                      </div>
+                      <details className="mt-1 max-w-72 text-xs text-[var(--text-muted)]">
+                        <summary className="cursor-pointer">Why?</summary>
+                        <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                          {o.reasons.map((reason, index) => (
+                            <li key={`${o.id}-${index}`}>{reason}</li>
+                          ))}
+                        </ul>
+                      </details>
+                    </TableCell>
                     <TableCell className="text-xs">
                       {new Date(o.firstSeenAt).toLocaleDateString()}
                       <br />
@@ -336,6 +408,30 @@ export function JobIndexPage() {
                             {s}
                           </Button>
                         ))}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() =>
+                            relevanceMutation.mutate({
+                              id: o.id,
+                              relevant: true
+                            })
+                          }
+                        >
+                          relevant
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() =>
+                            relevanceMutation.mutate({
+                              id: o.id,
+                              relevant: false
+                            })
+                          }
+                        >
+                          irrelevant
+                        </Button>
                         <Button
                           size="sm"
                           variant="ghost"

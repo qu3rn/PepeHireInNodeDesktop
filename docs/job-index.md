@@ -6,6 +6,12 @@ Job Index is PepeHire's unified, local-first archive of offers. Offers collected
 
 The page can start collection for selected portals and search the archive by free text, portal, status, title/company/description keywords, include/exclude terms, required technologies, location, remote mode, contract type, minimum monthly salary, and first-seen dates. Results are sortable and paginated. The current collector architecture has a production listing adapter for Pracuj; other portal choices return an explicit unsupported-collector run until their portal adapters are implemented.
 
+### Search profiles and relevance
+
+Collection applies a deterministic `SearchProfile` after raw extraction and normalization, before an offer receives `new` status. The built-in **Frontend React** profile requires at least one frontend signal, prefers React, Frontend, TypeScript, JavaScript, Next.js, Vite, Tailwind, and Redux, and strongly penalizes Java/Spring, DevOps, data, AI/ML, embedded, and QA Automation roles. Title matches are strongest, tags medium, and descriptions weakest. Node.js is not negative by itself; only an explicit backend/Node developer title is strongly penalized.
+
+Every offer stores its profile score, `match` / `low_relevance` / `excluded` decision, profile ID, and explanation reasons. Non-matches are retained locally with `low_relevance` lifecycle status and are hidden by default through a UI toggle. Manual “relevant” and “irrelevant” corrections update the profile decision and append an explanation. Saved/applied/ignored and pinned records are not overwritten by automatic collection scoring.
+
 Portal extraction uses three stages: portal-specific selectors and an HTML extractor produce tolerant `RawOfferListingItem`/`RawOfferDetails` values and warnings; a pure mapper normalizes them into `CollectedOffer`; persistence turns that into an `Offer`. Mapping tests do not launch Playwright.
 
 ## Deduplication and changes
