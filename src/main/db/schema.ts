@@ -26,6 +26,8 @@ export const offersTable = sqliteTable("offers", {
   reasonsJson: text("reasons_json").notNull().default("[]"),
   status: text("status").notNull().default("new"),
   relevanceScore: integer("relevance_score"),
+  relevanceDecision: text("profile_relevance_decision"),
+  searchProfileId: text("search_profile_id"),
   fingerprint: text("fingerprint"),
   searchableText: text("searchable_text").notNull().default(""),
   firstSeenAt: text("first_seen_at"),

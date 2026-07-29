@@ -9,9 +9,15 @@ type KnownStatus =
   | "skip"
   | "job_offer"
   | "listing"
-  | "unknown";
+  | "unknown"
+  | "match"
+  | "low_relevance"
+  | "excluded";
 
-const STATUS_MAP: Record<KnownStatus, { label: string; variant: BadgeProps["variant"] }> = {
+const STATUS_MAP: Record<
+  KnownStatus,
+  { label: string; variant: BadgeProps["variant"] }
+> = {
   pending: { label: "Pending", variant: "default" },
   sent: { label: "Sent", variant: "success" },
   skipped: { label: "Skipped", variant: "secondary" },
@@ -20,7 +26,10 @@ const STATUS_MAP: Record<KnownStatus, { label: string; variant: BadgeProps["vari
   skip: { label: "Skip", variant: "destructive" },
   job_offer: { label: "Job Offer", variant: "success" },
   listing: { label: "Listing", variant: "secondary" },
-  unknown: { label: "Unknown", variant: "outline" }
+  unknown: { label: "Unknown", variant: "outline" },
+  match: { label: "Match", variant: "success" },
+  low_relevance: { label: "Low relevance", variant: "warning" },
+  excluded: { label: "Excluded", variant: "destructive" }
 };
 
 export function StatusBadge({

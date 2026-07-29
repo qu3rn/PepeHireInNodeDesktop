@@ -6,9 +6,10 @@ export interface JobIndexFilters {
   location?: string; remoteModes?: string[]; contractTypes?: string[]; minimumSalary?: number;
   firstSeenFrom?: string; firstSeenTo?: string; activeOnly?: boolean;
   sortBy?: "relevance" | "firstSeen" | "lastSeen" | "salary" | "title"; sortDirection?: "asc" | "desc";
+  showLowRelevance?: boolean;
 }
 export interface JobIndexCriteria extends Omit<JobIndexFilters, "page" | "pageSize" | "statuses" | "sortBy" | "sortDirection"> {
-  sources: Exclude<OfferSource, "manual">[]; phrase: string; titleKeywords?: string[]; pageLimit?: number; resultLimit?: number;
+  sources: Exclude<OfferSource, "manual">[]; phrase: string; titleKeywords?: string[]; pageLimit?: number; resultLimit?: number; searchProfileId?: string;
 }
 export interface ReindexOptions { offerIds?: string[] }
 export interface ReindexSummary { recordsChecked: number; recordsUpdated: number; duplicatesMerged: number; invalidRecordsFound: number; errors: number }

@@ -1,7 +1,26 @@
 export type Decision = "apply" | "maybe" | "skip";
-export type OfferStatus = "new" | "seen" | "saved" | "applied" | "ignored" | "expired" | "invalid";
-export type AvailabilityState = "active" | "expired" | "unavailable" | "redirected" | "unknown";
-export type OfferSource = "manual" | "pracuj" | "justjoinit" | "rocketjobs" | "nofluffjobs";
+export type OfferStatus =
+  | "new"
+  | "seen"
+  | "saved"
+  | "applied"
+  | "ignored"
+  | "low_relevance"
+  | "expired"
+  | "invalid";
+export type ProfileRelevanceDecision = "match" | "low_relevance" | "excluded";
+export type AvailabilityState =
+  | "active"
+  | "expired"
+  | "unavailable"
+  | "redirected"
+  | "unknown";
+export type OfferSource =
+  | "manual"
+  | "pracuj"
+  | "justjoinit"
+  | "rocketjobs"
+  | "nofluffjobs";
 export type SearchRunStatus = "running" | "completed" | "cancelled" | "failed";
 export type RapidApplyStatus =
   | "created"
@@ -39,6 +58,8 @@ export interface Offer {
   reasons: string[];
   status: OfferStatus;
   relevanceScore: number | null;
+  relevanceDecision: ProfileRelevanceDecision | null;
+  searchProfileId: string | null;
   fingerprint: string;
   searchableText: string;
   firstSeenAt: string;
@@ -84,6 +105,8 @@ export interface CreateOfferInput {
   reasons?: string[];
   status?: OfferStatus;
   relevanceScore?: number | null;
+  relevanceDecision?: ProfileRelevanceDecision | null;
+  searchProfileId?: string | null;
   fingerprint?: string;
   searchableText?: string;
   firstSeenAt?: string;
@@ -119,6 +142,8 @@ export interface UpdateOfferInput {
   reasons?: string[];
   status?: OfferStatus;
   relevanceScore?: number | null;
+  relevanceDecision?: ProfileRelevanceDecision | null;
+  searchProfileId?: string | null;
   fingerprint?: string;
   searchableText?: string;
   firstSeenAt?: string;
@@ -168,6 +193,7 @@ export interface SearchCriteria {
   remoteOnly?: boolean;
   pageLimit?: number;
   resultLimit?: number;
+  searchProfile?: import("../job-index/search-profile").SearchProfile;
 }
 
 export interface CollectedOffer {
@@ -227,7 +253,16 @@ export interface CandidateProfile {
 export interface RapidApplyField {
   key: string;
   label: string;
-  type: "text" | "email" | "phone" | "file" | "textarea" | "select" | "radio" | "checkbox" | "unknown";
+  type:
+    | "text"
+    | "email"
+    | "phone"
+    | "file"
+    | "textarea"
+    | "select"
+    | "radio"
+    | "checkbox"
+    | "unknown";
   required: boolean;
   options?: string[];
 }
