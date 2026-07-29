@@ -1,8 +1,20 @@
 import { describe, expect, it } from "vitest";
 import { randomUUID } from "node:crypto";
 import { CollectorService } from "../src/main/collectors/collector.service";
-import type { OfferRepository, SearchRunPatch, SearchRunRepository } from "../src/main/adapters/repositories";
-import type { CollectorProgress, CreateOfferInput, Offer, OfferListQuery, PaginatedResult, SearchRun, UpdateOfferInput } from "../src/main/shared/types";
+import type {
+  OfferRepository,
+  SearchRunPatch,
+  SearchRunRepository
+} from "../src/main/adapters/repositories";
+import type {
+  CollectorProgress,
+  CreateOfferInput,
+  Offer,
+  OfferListQuery,
+  PaginatedResult,
+  SearchRun,
+  UpdateOfferInput
+} from "../src/main/shared/types";
 import type { PortalCollector } from "../src/main/collectors/collector.types";
 
 class InMemoryOffersRepo implements OfferRepository {
@@ -33,11 +45,19 @@ class InMemoryOffersRepo implements OfferRepository {
       score: input.score ?? null,
       decision: input.decision ?? null,
       reasons: input.reasons ?? [],
-      status: input.status ?? "new", relevanceScore: input.relevanceScore ?? input.score ?? null,
-      fingerprint: input.fingerprint ?? "", searchableText: input.searchableText ?? "",
-      firstSeenAt: input.firstSeenAt ?? new Date().toISOString(), lastSeenAt: input.lastSeenAt ?? new Date().toISOString(),
-      lastCheckedAt: input.lastCheckedAt ?? null, availability: input.availability ?? "unknown", changedAt: input.changedAt ?? null,
-      pinned: input.pinned ?? false, notes: input.notes ?? null,
+      status: input.status ?? "new",
+      relevanceScore: input.relevanceScore ?? input.score ?? null,
+      relevanceDecision: input.relevanceDecision ?? null,
+      searchProfileId: input.searchProfileId ?? null,
+      fingerprint: input.fingerprint ?? "",
+      searchableText: input.searchableText ?? "",
+      firstSeenAt: input.firstSeenAt ?? new Date().toISOString(),
+      lastSeenAt: input.lastSeenAt ?? new Date().toISOString(),
+      lastCheckedAt: input.lastCheckedAt ?? null,
+      availability: input.availability ?? "unknown",
+      changedAt: input.changedAt ?? null,
+      pinned: input.pinned ?? false,
+      notes: input.notes ?? null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -105,8 +125,12 @@ class InMemoryOffersRepo implements OfferRepository {
     return Array.from(this.offers.values());
   }
 
-  async upsert(input: CreateOfferInput): Promise<{ offer: Offer; created: boolean }> {
-    const existing = Array.from(this.offers.values()).find((x) => (input.sourceId ? x.sourceId === input.sourceId : x.url === input.url));
+  async upsert(
+    input: CreateOfferInput
+  ): Promise<{ offer: Offer; created: boolean }> {
+    const existing = Array.from(this.offers.values()).find((x) =>
+      input.sourceId ? x.sourceId === input.sourceId : x.url === input.url
+    );
     if (!existing) {
       const offer = await this.create(input);
       return { offer, created: true };
@@ -119,7 +143,15 @@ class InMemoryOffersRepo implements OfferRepository {
       technologies: input.technologies ?? existing.technologies,
       score: input.score ?? existing.score,
       decision: input.decision ?? existing.decision,
-      reasons: input.reasons ?? existing.reasons
+      reasons: input.reasons ?? existing.reasons,
+      relevanceScore: input.relevanceScore ?? existing.relevanceScore,
+      relevanceDecision: input.relevanceDecision ?? existing.relevanceDecision,
+      searchProfileId: input.searchProfileId ?? existing.searchProfileId,
+      status:
+        ["saved", "applied", "ignored"].includes(existing.status) ||
+        existing.pinned
+          ? existing.status
+          : (input.status ?? existing.status)
     });
 
     return { offer: updated, created: false };
@@ -129,7 +161,30 @@ class InMemoryOffersRepo implements OfferRepository {
 class InMemorySearchRunsRepo implements SearchRunRepository {
   private runs = new Map<string, SearchRun>();
 
-  async create(input: Omit<SearchRun, "finishedAt" | "collectedCount" | "savedCount" | "skippedCount" | "failedCount" | "errorSummary" | "message"> & Partial<Pick<SearchRun, "finishedAt" | "collectedCount" | "savedCount" | "skippedCount" | "failedCount" | "errorSummary" | "message">>): Promise<SearchRun> {
+  async create(
+    input: Omit<
+      SearchRun,
+      | "finishedAt"
+      | "collectedCount"
+      | "savedCount"
+      | "skippedCount"
+      | "failedCount"
+      | "errorSummary"
+      | "message"
+    > &
+      Partial<
+        Pick<
+          SearchRun,
+          | "finishedAt"
+          | "collectedCount"
+          | "savedCount"
+          | "skippedCount"
+          | "failedCount"
+          | "errorSummary"
+          | "message"
+        >
+      >
+  ): Promise<SearchRun> {
     const run: SearchRun = {
       id: input.id,
       source: input.source,
@@ -216,8 +271,18 @@ describe("CollectorService", () => {
       }
     };
 
-    const service = new CollectorService(offers, runs, fakeBrowserService as never, [portalCollector]);
-    const { runId } = await service.start({ source: "pracuj", phrase: "frontend", pageLimit: 1, resultLimit: 10 });
+    const service = new CollectorService(
+      offers,
+      runs,
+      fakeBrowserService as never,
+      [portalCollector]
+    );
+    const { runId } = await service.start({
+      source: "pracuj",
+      phrase: "frontend",
+      pageLimit: 1,
+      resultLimit: 10
+    });
 
     for (let i = 0; i < 15; i += 1) {
       const status = await service.getStatus(runId);
@@ -266,8 +331,16 @@ describe("CollectorService", () => {
       }
     };
 
-    const service = new CollectorService(offers, runs, fakeBrowserService as never, [portalCollector]);
-    const { runId } = await service.start({ source: "pracuj", phrase: "frontend" });
+    const service = new CollectorService(
+      offers,
+      runs,
+      fakeBrowserService as never,
+      [portalCollector]
+    );
+    const { runId } = await service.start({
+      source: "pracuj",
+      phrase: "frontend"
+    });
 
     for (let i = 0; i < 15; i += 1) {
       const status = await service.getStatus(runId);
@@ -284,5 +357,49 @@ describe("CollectorService", () => {
 
     const all = await offers.all();
     expect(all[0]?.title).toBe("Updated title");
+  });
+
+  it("does not overwrite a saved offer when profile scoring rejects it", async () => {
+    const offers = new InMemoryOffersRepo();
+    const runs = new InMemorySearchRunsRepo();
+    await offers.create({
+      source: "pracuj",
+      sourceId: "saved-1",
+      url: "https://it.pracuj.pl/oferta/saved,saved-1",
+      title: "Old title",
+      status: "saved"
+    });
+    const portalCollector: PortalCollector = {
+      source: "pracuj",
+      async collect() {
+        return [
+          {
+            source: "pracuj",
+            sourceId: "saved-1",
+            url: "https://it.pracuj.pl/oferta/saved,saved-1",
+            title: "Java Developer",
+            technologies: ["Spring"]
+          }
+        ];
+      }
+    };
+    const service = new CollectorService(
+      offers,
+      runs,
+      fakeBrowserService as never,
+      [portalCollector]
+    );
+    const { runId } = await service.start({
+      source: "pracuj",
+      phrase: "frontend"
+    });
+    for (
+      let i = 0;
+      i < 15 && (await service.getStatus(runId)).status === "running";
+      i += 1
+    )
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    expect((await offers.all())[0]?.status).toBe("saved");
+    expect((await offers.all())[0]?.relevanceDecision).toBe("excluded");
   });
 });
